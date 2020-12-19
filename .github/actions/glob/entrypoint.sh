@@ -10,11 +10,11 @@ chmod 600 service-account
 chmod 600 id_ssh
 chmod 600 id_ssh.pub
 
-janeway release glob --no-pill \
-    --credentials service-account \
-    --ssh-key id_ssh \
-    --do-it-live \
-  | bash
+# janeway release glob --no-pill \
+#     --credentials service-account \
+#     --ssh-key id_ssh \
+#     --do-it-live \
+#   | bash
 
 SHORTHASH=$(git rev-parse --short HEAD)
 
@@ -22,11 +22,13 @@ janeway release prepare-ota arvo-glob-"$SHORTHASH" "$1" \
     --credentials service-account \
     --ssh-key id_ssh \
     --do-it-live \
+    --verbose \
   | bash
 
 janeway release perform-ota "$1" \
     --credentials service-account \
     --ssh-key id_ssh \
     --do-it-live \
+    --verbose \
   | bash
 
