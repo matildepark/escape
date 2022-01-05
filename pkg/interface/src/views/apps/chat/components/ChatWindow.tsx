@@ -253,7 +253,7 @@ class ChatWindow extends Component<
 
     return (
       <Col height='100%' overflow='hidden' position='relative'>
-        { this.dismissedInitialUnread() &&
+        {this.dismissedInitialUnread() &&
          (<UnreadNotice
           unreadCount={unreadCount}
           unreadMsg={

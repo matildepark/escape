@@ -119,7 +119,7 @@ function GraphPermalink(
     const link = `/perma${getPermalinkForGraph(group, graph, index).slice(16)}`;
     return (!association && !loading)
       ? { search: `?join-kind=group&join-path=${encodeURIComponent(group)}&redir=${encodeURIComponent(link)}`  }
-        :  link
+        :  link;
   })();
 
   const [nodeGroupHost, nodeGroupName] = association?.group.split('/').slice(-2) ?? ['Unknown', 'Unknown'];
