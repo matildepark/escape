@@ -17,7 +17,7 @@ let devServer = {
   historyApiFallback: {
     disableDotRule: true
   },
-  publicPath: '/apps/landscape/'
+  publicPath: '/apps/escape/'
 };
 
 const router =  _.mapKeys(urbitrc.FLEET || {}, (value, key) => `${key}.localhost:9000`);
@@ -33,10 +33,10 @@ if(urbitrc.URL) {
       {
         context: (path) => {
           console.log(path);
-          if(path === '/apps/landscape/desk.js') {
+          if(path === '/apps/escape/desk.js') {
             return true;
           }
-          return !path.startsWith('/apps/landscape');
+          return !path.startsWith('/apps/escape');
         },
         changeOrigin: true,
         target: urbitrc.URL,
@@ -122,7 +122,7 @@ module.exports = {
 
     // new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: 'Groups',
+      title: 'EScape',
       template: './public/index.html'
     })
   ],
@@ -133,7 +133,7 @@ module.exports = {
     },
     chunkFilename: '[name].js',
     path: path.resolve(__dirname, '../dist'),
-    publicPath: '/apps/landscape/',
+    publicPath: '/apps/escape/',
     globalObject: 'this'
   },
   optimization: {
