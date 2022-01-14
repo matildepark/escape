@@ -11,7 +11,7 @@ import { MOBILE_BROWSER_REGEX } from '~/logic/lib/util';
 import '../css/custom.css';
 import { useChatStore } from './ChatPane';
 
-const isMobile = Boolean(MOBILE_BROWSER_REGEX.test(navigator.userAgent));
+export const isMobile = Boolean(MOBILE_BROWSER_REGEX.test(navigator.userAgent));
 
 const MARKDOWN_CONFIG = {
   name: 'markdown',
