@@ -15,7 +15,7 @@ import useGroupState from "~/logic/state/group";
 import useInviteState, { useInviteForResource } from "~/logic/state/invite";
 import useMetadataState, { usePreview } from "~/logic/state/metadata";
 import { decline, Invite } from "@urbit/api";
-import { join, JoinRequest } from "@urbit/api/groups";
+import { join, JoinRequest } from "@urbit/api";
 import airlock from "~/logic/api";
 import { joinError, joinResult, joinLoad, JoinProgress } from "@urbit/api";
 import { useQuery } from "~/logic/lib/useQuery";
