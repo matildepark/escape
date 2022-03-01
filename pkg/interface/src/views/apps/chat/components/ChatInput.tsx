@@ -1,6 +1,6 @@
 import { Box, Icon, LoadingSpinner, Row } from '@tlon/indigo-react';
 import { Association, Contact, Content, evalCord, Group } from '@urbit/api';
-import React, { FC, PropsWithChildren, useRef, useState } from 'react';
+import React, { FC, PropsWithChildren, useState } from 'react';
 import tokenizeMessage from '~/logic/lib/tokenizeMessage';
 import { IuseStorage } from '~/logic/lib/useStorage';
 import { MOBILE_BROWSER_REGEX } from '~/logic/lib/util';

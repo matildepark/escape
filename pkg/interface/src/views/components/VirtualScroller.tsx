@@ -25,7 +25,7 @@ const Scrollbar = styled(Box)`
   right: 0;
   height: 50px;
   position: absolute;
-  pointer: cursor;
+  cursor: pointer;
 `;
 
 interface RendererProps<K> {

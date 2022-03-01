@@ -75,14 +75,14 @@ const MessageActions = ({ onReply, onDelete, onLike, onBookmark, msg, isAdmin, p
         >
           <Icon icon='Chat' size={3} className="actionIcon" />
         </Box>
-        <Box
+        {onLike && <Box
           padding={1}
           size={'24px'}
           cursor='pointer'
           onClick={() => onLike(msg)}
         >
           <Icon icon='CheckmarkBold' size="20px" mt="-2px" ml="-2px" className="actionIcon" />
-        </Box>
+        </Box>}
         {bookmarked ? (
           <Box padding={1} size={'20px'} cursor='pointer' onClick={toggleBookmark()}>
             {bookmarkIcon}

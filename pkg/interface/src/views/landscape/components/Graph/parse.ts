@@ -23,7 +23,7 @@ const DISABLED_INLINE_TOKENS = ['autoLink', 'url', 'email', 'reference', 'html']
 
 const tallParser = remark().freeze();
 
-export const parseTall = (text: string) => tallParser.parse(text.replace(/\n/gi, '\n &nbsp;'));
+export const parseTall = (text: string) => tallParser.parse(text);
 
 const wideParser = remark()
   .use([
@@ -37,4 +37,4 @@ const wideParser = remark()
     newlines
   ]);
 
-export const parseWide = (text: string) => wideParser.parse(text.replace(/\n/gi, '\n &nbsp;'));
+export const parseWide = (text: string) => wideParser.parse(text);

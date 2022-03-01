@@ -13,6 +13,11 @@ import useStorageState from '../state/storage';
 export async function bootstrapApi(reset = false) {
   if (reset) {
     airlock.reset();
+
+    const isResourceView = window.location.href.match(/\/resource\/[a-z]*?\/ship\//);
+    if (isResourceView) {
+      return;
+    }
   }
 
   airlock.onError = async (err) => {

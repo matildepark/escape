@@ -253,7 +253,7 @@ const renderers = {
         fontSize={0}
         style={{ whiteSpace: 'pre-wrap' }}
       >
-        {value.replace('&nbsp;', '')}
+        {value}
       </Text>
     );
   },
@@ -326,7 +326,7 @@ const renderers = {
         overflowX="auto"
         style={{ whiteSpace: 'pre' }}
       >
-        {value.replace('&nbsp;', '')}
+        {value}
       </Text>
     );
     return tall ? <Box mb={2}>{inner}</Box> : inner;
