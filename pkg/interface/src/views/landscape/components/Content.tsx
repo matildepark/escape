@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 import useMetadataState from '~/logic/state/metadata';
 import Notifications from '~/views/apps/notifications/notifications';
+import Info from '~/views/apps/info/Info';
 import { PermalinkRoutes } from '~/views/apps/permalinks/app';
 import Profile from '~/views/apps/profile/profile';
 import Settings from '~/views/apps/settings/settings';
@@ -35,17 +36,17 @@ export const Content = (props) => {
 
   useEffect(() => {
     // Mobile notification pop-ups when app is in background or foreground (not when closed)
-    api.subscribe({ app: 'hark-store', path: '/notes',
-      event: (u: any) => {
-        if ('add-note' in u) {
-          const { bin, body } = u['add-note'];
-          const binId = harkBinToId(bin);
-          postReactNativeMessage({ type: 'hark-notification', binId, body, redirect: getNotificationRedirect(body.link) });
-        }
-      }
-    });
+    // api.subscribe({ app: 'hark-store', path: '/notes',
+    //   event: (u: any) => {
+    //     if ('add-note' in u) {
+    //       const { bin, body } = u['add-note'];
+    //       const binId = harkBinToId(bin);
+    //       postReactNativeMessage({ type: 'hark-notification', binId, body, redirect: getNotificationRedirect(body.link) });
+    //     }
+    //   }
+    // });
 
-    return history.listen((location, action) => {
+    return history.listen((location) => {
       postReactNativeMessage({ type: 'navigation-change', pathname: location.pathname });
     });
   }, []);
@@ -122,6 +123,12 @@ export const Content = (props) => {
           path="/~notifications"
           render={ p => (
             <Notifications {...props} />
+          )}
+        />
+        <Route
+          path="/~info"
+          render={ p => (
+            <Info {...props} />
           )}
         />
         <GraphApp path="/~graph" {...props} />

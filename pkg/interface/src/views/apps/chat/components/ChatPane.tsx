@@ -17,7 +17,6 @@ import { CodeMirrorShim } from './ChatEditor';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import { LinkCollection } from '../ChatResource';
 
-
 interface useChatStoreType {
   id: string;
   message: string;
@@ -61,8 +60,8 @@ interface ChatPaneProps {
    * The graph of the chat to render
    */
   graph: Graph;
-  group: Group;
-  association: Association;
+  group?: Group;
+  association?: Association;
   unreadCount: number;
   /**
    * User able to write to chat

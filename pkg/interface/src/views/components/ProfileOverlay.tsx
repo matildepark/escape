@@ -1,4 +1,4 @@
-import { BaseImage, Box, BoxProps, Button, Center, Col, Icon, Row, Text } from '@tlon/indigo-react';
+import { BaseImage, Box, BoxProps, Center, Col, Icon, Row, Text } from '@tlon/indigo-react';
 import { uxToHex } from '@urbit/api';
 import shallow from 'zustand/shallow';
 import _ from 'lodash';
@@ -29,6 +29,7 @@ const FixedOverlay = styled(Col)`
 
 export const ActionRow = styled(Row)`
   padding: 4px;
+  padding-left: 6px;
   width: 80%;
   cursor: pointer;
   &:hover {
@@ -95,7 +96,7 @@ const ProfileOverlay = (props: ProfileOverlayProps) => {
           outer,
           spaceAtRight ? 'left' : 'right',
           spaceAtTop ? 'bottom' : 'top',
-          -1* outer.clientWidth,
+          0,
           -1 * outer.clientHeight
         ));
       }
@@ -149,10 +150,9 @@ const ProfileOverlay = (props: ProfileOverlayProps) => {
         fontSize={0}
         width='300px'
         padding={3}
-        alignItems='center'
       >
         <Row
-          height='60px'
+          minHeight='60px'
           cursor='pointer'
           onClick={() => history.push(`/~profile/~${ship}`)}
           overflow='hidden'
@@ -171,9 +171,7 @@ const ProfileOverlay = (props: ProfileOverlayProps) => {
               <Text
                 fontWeight='600'
                 mono={!showNickname}
-                textOverflow='ellipsis'
                 overflow='hidden'
-                whiteSpace='pre'
                 marginBottom={0}
                 cursor='pointer'
                 display={didCopy ? 'none' : 'block'}

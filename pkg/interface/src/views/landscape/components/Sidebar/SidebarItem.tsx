@@ -50,6 +50,7 @@ export function SidebarItemBase(props: {
   isGroup?: boolean;
   locked?: boolean;
   isAdmin?: boolean;
+  open?: boolean;
   indent?: number;
   onClick?: (e: MouseEvent) => void;
 }) {
@@ -69,6 +70,7 @@ export function SidebarItemBase(props: {
     isGroup = false,
     locked = false,
     isAdmin = false,
+    open = false,
     indent = 0,
     onClick
   } = props;
@@ -98,11 +100,16 @@ export function SidebarItemBase(props: {
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      position="relative"
+      position={open ? 'sticky' : 'relative'}
+      top={open ? '0px' : undefined}
+      zIndex="1"
+      backgroundColor="white"
+      opacity={1}
       py={1}
       pl={`${8 + indent * 28}px`}
       pr={3}
       selected={selected}
+      open={open}
     >
       <Row width="100%" alignItems="center" flex="1 auto" minWidth="0">
         {children}
@@ -133,8 +140,9 @@ export function SidebarItemBase(props: {
             <Box style={{ display: 'inline-block', margin: '4px 0 0 16px' }} onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              history.push('/~landscape/messages/new')
-            }}>
+              history.push('/~landscape/messages/new');
+            }}
+            >
               <Icon icon="Plus" color="gray" pr='12px' />
             </Box>
           )}

@@ -5,7 +5,7 @@ import {
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { roleForShip } from '~/logic/lib/group';
-import { IS_MOBILE } from '~/logic/lib/platform';
+import { IS_SMALL_SCREEN } from '~/logic/lib/platform';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 import { getGroupFromWorkspace } from '~/logic/lib/workspace';
 import useGroupState from '~/logic/state/group';
@@ -34,7 +34,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
   const groupPath = getGroupFromWorkspace(workspace);
   const [changingSort, setChangingSort] = useState(false);
 
-  const [config, setConfig] = useLocalStorageState<SidebarListConfig>(
+  const [config] = useLocalStorageState<SidebarListConfig>(
     `group-config:${groupPath || 'home'}`,
     {
       sortBy: 'lastUpdated',
@@ -49,9 +49,9 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
   const focusMessages = props.baseUrl.includes('~landscape/messages');
   let groupsHeight = 'calc(75% - 23px)';
   let messagesHeight = 'calc(25% - 24px)';
-  if (IS_MOBILE && focusMessages) {
+  if (IS_SMALL_SCREEN && focusMessages) {
     messagesHeight = 'calc(100% - 47px)';
-  } else if (IS_MOBILE) {
+  } else if (IS_SMALL_SCREEN) {
     groupsHeight = 'calc(100% - 47px)';
   } else if (focusMessages) {
     groupsHeight = 'calc(50% - 24px)';
@@ -68,40 +68,44 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
         changingSort={changingSort}
         toggleChangingSort={() => setChangingSort(!changingSort)}
       />
-      {(!IS_MOBILE || !focusMessages) && <ScrollbarLessCol
-        display="flex"
-        width="100%"
-        gridRow="1/2"
-        gridColumn="1/2"
-        borderTopLeftRadius={2}
-        borderRight={1}
-        borderRightColor="lightGray"
-        overflowY="scroll"
-        fontSize={0}
-        position="relative"
-        height={groupsHeight}
-        borderBottom={1}
-        borderBottomColor="lightGray"
-        pb={1}
-      >
-        <Box mt={2} />
-        <SidebarGroupList {...{ config, selected, baseUrl, changingSort }} />
-      </ScrollbarLessCol>}
-      {(!IS_MOBILE || focusMessages) && <ScrollbarLessCol
-        display="flex"
-        width="100%"
-        gridRow="1/2"
-        gridColumn="1/2"
-        borderTopLeftRadius={2}
-        borderRight={1}
-        borderRightColor="lightGray"
-        overflowY="scroll"
-        fontSize={0}
-        position="relative"
-        height={messagesHeight}
-      >
-        <SidebarGroupList {...{ config, selected, baseUrl }} messages />
-      </ScrollbarLessCol>}
+      {(!IS_SMALL_SCREEN || !focusMessages) && (
+        <ScrollbarLessCol
+          display="flex"
+          width="100%"
+          gridRow="1/2"
+          gridColumn="1/2"
+          borderTopLeftRadius={2}
+          borderRight={1}
+          borderRightColor="lightGray"
+          overflowY="scroll"
+          fontSize={0}
+          position="relative"
+          height={groupsHeight}
+          borderBottom={1}
+          borderBottomColor="lightGray"
+          pb={1}
+        >
+          <Box mt={2} />
+          <SidebarGroupList {...{ config, selected, baseUrl, changingSort }} />
+        </ScrollbarLessCol>
+      )}
+      {(!IS_SMALL_SCREEN || focusMessages) && (
+        <ScrollbarLessCol
+          display="flex"
+          width="100%"
+          gridRow="1/2"
+          gridColumn="1/2"
+          borderTopLeftRadius={2}
+          borderRight={1}
+          borderRightColor="lightGray"
+          overflowY="scroll"
+          fontSize={0}
+          position="relative"
+          height={messagesHeight}
+        >
+          <SidebarGroupList {...{ config, selected, baseUrl }} messages />
+        </ScrollbarLessCol>
+      )}
     </Box>
   );
 }

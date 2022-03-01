@@ -1,4 +1,4 @@
-import React, { MouseEvent, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { Associations } from '@urbit/api';
 import _ from 'lodash';
 
@@ -120,7 +120,7 @@ export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
   const locked = isGroup && Boolean(groups[association.group]?.policy?.invite);
 
   return (
-    <Box ref={groupRef}>
+    <Box ref={groupRef} position="relative">
       {!isMobileMessages && <SidebarItemBase
         to={to}
         selected={groupSelected}
@@ -134,6 +134,7 @@ export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
         isGroup
         locked={locked}
         isAdmin={isAdmin}
+        open={!collapsed}
       >
         {!isMessages && (
           <Icon
@@ -144,13 +145,14 @@ export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
               e.preventDefault();
               e.stopPropagation();
               setCollapsed(!collapsed);
+              groupRef.current?.scrollIntoView();
             }}
             icon={collapsed ? 'TriangleEast' : 'TriangleSouth'}
           />
         )}
       </SidebarItemBase>}
       {!collapsed && (
-        <Box>
+        <Box position="relative" style={{ zIndex: 0 }}>
           {feedPath && IS_MOBILE && <SidebarItemBase
             to={`/~landscape${groupPath}/feed`}
             selected={history.location.pathname.includes('feed')}

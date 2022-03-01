@@ -172,6 +172,7 @@ export const MessageAuthor = React.memo<any>(({
             whiteSpace='nowrap'
             gray
             ml={2}
+            mt="5px"
             display={['none', hovering ? 'block' : 'none']}
           >
             {datestamp}
@@ -322,8 +323,8 @@ const MessageWrapper = (props) => {
       {...bind}
     >
       {props.children}
-      <LikeIndicator {...{ transcluded, isLiked, didLike, dark, likers, showLikers: IS_MOBILE && hovering }} onLike={() => likeMessage(msg)} />
-      {showHover ? <MessageActions {...{ ...props, onLike: likeMessage }} /> : null}
+      {onLike && <LikeIndicator {...{ transcluded, isLiked, didLike, dark, likers, showLikers: IS_MOBILE && hovering }} onLike={() => likeMessage(msg)} />}
+      {showHover ? <MessageActions {...{ ...props, onLike: onLike && likeMessage }} /> : null}
     </Box>
   );
 };

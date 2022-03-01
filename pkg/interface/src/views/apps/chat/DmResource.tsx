@@ -135,6 +135,39 @@ export function DmResource(props: DmResourceProps) {
     await airlock.poke(declineDm(ship));
   };
 
+  // const onLike = useCallback(async ({ author, signatures, index }: Post) => {
+  //   if (window.ship !== author) {
+  //     const ship = window.ship;
+  //     const name = 'dm-inbox';
+  //     const remove = signatures.find(({ ship }) => ship === window.ship);
+
+  //     const body = remove
+  //       ? {
+  //         'remove-signatures': {
+  //           uid: { resource: { ship, name }, index },
+  //           signatures: []
+  //         }
+  //       } // unlike
+  //       : {
+  //         'add-signatures': {
+  //           uid: { resource: { ship, name }, index },
+  //           signatures: []
+  //         }
+  //       }; // like
+
+  //     // TODO: remove this check once the remove-signatures backend has been updated. Right now it removes all signatures, which is wrong
+  //     if (!remove) {
+  //       await airlock.thread({
+  //         inputMark: 'graph-update-3',
+  //         outputMark: 'json',
+  //         threadName: `${remove ? 'remove' : 'add'}-signatures`,
+  //         desk: 'escape',
+  //         body
+  //       });
+  //     }
+  //   }
+  // }, []);
+
   return (
     <Col width="100%" height="100%" overflow="hidden">
       <Row

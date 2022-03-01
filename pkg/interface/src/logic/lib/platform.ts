@@ -8,6 +8,7 @@ export const IS_SAFARI = ua.includes('Safari') && !ua.includes('Chrome');
 export const IS_ANDROID = ua.includes('Android');
 
 export const IS_MOBILE = (IS_IOS || IS_ANDROID) && window.innerWidth < 750;
+export const IS_SMALL_SCREEN = window.innerWidth < 900 || window.innerHeight < 660;
 
 export const isMobileApp = () => IS_MOBILE && window.location.search.includes('isMobileApp=true');
 export const isMobileWeb = () => IS_MOBILE && !window.location.search.includes('isMobileApp=true');

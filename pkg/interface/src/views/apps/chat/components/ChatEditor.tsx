@@ -121,7 +121,7 @@ const MobileBox = styled(Box)`
 interface ChatEditorProps {
   inCodeMode: boolean;
   placeholder: string;
-  submit: (message: string) => void;
+  submit: () => void;
   onPaste: (codemirrorInstance, event: ClipboardEvent) => void;
   isAdmin: boolean;
   group: Group;
@@ -233,8 +233,8 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     }
   };
 
-  const onSubmit = useCallback((msg: string) => {
-    submit(msg);
+  const onSubmit = useCallback(() => {
+    submit();
     setAutocompleteValues(false, [], '');
   }, [setAutocompleteValues, submit]);
 
@@ -248,7 +248,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
 
     setMessage(value);
 
-    if (!group || memberArray.length > 200 || !value.includes('~'))
+    if (!group || memberArray.length > 500 || !value.includes('~'))
       return;
 
     const sigMatch = SIG_REGEX.test(value);
@@ -299,7 +299,13 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
           setMentionCursor(mentionCursor + 1);
         }
       }) : undefined,
-      'Enter': onSubmit,
+      'Enter': () => {
+        if (hasSuggestions) {
+          selectMember(autocompleteSuggestions[mentionCursor])();
+        } else {
+          onSubmit();
+        }
+      },
       'Esc': () => {
         if (hasSuggestions) {
           setAutoCompleteSuggestions([]);

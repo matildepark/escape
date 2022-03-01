@@ -52,7 +52,7 @@ function MobileNavItem({
       {Boolean(notifications) && (
         <Box
           position="absolute" right="calc(50% - 18px)"
-          top="4px" px="4px"
+          top={isMobileApp() ? '8px' : '4px'} px="4px"
           py="1px"
           borderRadius="8px" backgroundColor="blue"
           fontSize="12px" color="white"
