@@ -1,6 +1,6 @@
 {
   "name": "interface",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "",
   "main": "index.js",
   "private": true,
@@ -23,6 +23,7 @@
     "classnames": "^2.2.6",
     "codemirror": "^5.59.2",
     "css-loader": "^3.6.0",
+    "emoji-dictionary": "^1.0.11",
     "file-saver": "^2.0.5",
     "formik": "^2.1.5",
     "fuzzy": "^0.1.3",

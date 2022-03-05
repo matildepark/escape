@@ -17,9 +17,7 @@ import GraphApp from '../../apps/graph/App';
 import { getNotificationRedirect } from '~/logic/lib/notificationRedirects';
 import { JoinRoute } from './Join/Join';
 import useInviteState from '~/logic/state/invite';
-import api from '~/logic/api';
 import { postReactNativeMessage } from '~/logic/lib/reactNative';
-import { harkBinToId } from '@urbit/api';
 
 export const Container = styled(Box)`
    flex-grow: 1;

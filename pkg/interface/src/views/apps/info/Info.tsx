@@ -19,18 +19,16 @@ export default function InfoScreen(props: any): ReactElement {
       <Body>
         <Col overflowY="scroll" height="100%" py={3} px={4}>
           <H2>EScape Info</H2>
-          <H3 mt={4}>What&apos;s in v0.2.0</H3>
+          <H3 mt={4}>What&apos;s in v0.2.1</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
-          <Text mt={1}>- Add an info page for features like mentions, bookmarks, and updates</Text>
-          <Text mt={1}>- For iPad landscape, the sidebar should be full-screen for both groups and messages</Text>
-          <Text mt={1}>- If scrolled down in a group, the group still appears at the top</Text>
-          <Text mt={1}>- “Enter” key autocompletes @p mentions</Text>
-          <Text mt={1}>- Mobile push notifications</Text>
+          <Text mt={1}>- Add emoji support in chat</Text>
+          <Text mt={1}>- When replying to a message, show a reply placeholder instead of the graph url</Text>
+          <Text mt={1}>- The arrow keys and up/down page keys scroll by default if no text is entered or if a message has been moused over</Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
-          <Text mt={1}>- Fix nickname display in ProfileOverlay</Text>
-          <Text mt={1}>- Keep ProfileOverlay on-screen on mobile</Text>
-          <Text mt={1}>- Update @p mention feature to groups with {'< 500'} members (instead of 200)</Text>
-          <Text mt={1}>- Refreshing from a resource view no longer hangs</Text>
+          <Text mt={1}>- If some links in collection are deleted, input isn’t showing up</Text>
+          <Text mt={1}>- Sidebar overflows sidebar header on mobile when group is expanded</Text>
+          <Text mt={1}>- Better bookmark confirmation</Text>
+          <Text mt={1}>- In mobile replies, names with nicknames sometimes overflow on top of the quoted text</Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>
           <Row mt={1}>

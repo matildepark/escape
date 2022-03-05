@@ -15,7 +15,7 @@ export class OmniboxInput extends Component<OmniboxInputProps> {
       <BaseInput
         ref={(el) => {
           this.input = el;
-          if (el && document.activeElement.isSameNode(el)) {
+          if (el && document.activeElement?.isSameNode(el)) {
             el.blur();
             el.focus();
           }

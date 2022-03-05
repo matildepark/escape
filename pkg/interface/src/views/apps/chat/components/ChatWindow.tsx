@@ -8,6 +8,7 @@ import React, { Component, SyntheticEvent } from 'react';
 import { GraphScroller } from '~/views/components/GraphScroller';
 import VirtualScroller from '~/views/components/VirtualScroller';
 import { LinkCollection } from '../ChatResource';
+import { CodeMirrorShim } from './ChatEditor';
 import ChatMessage from './ChatMessage';
 import UnreadNotice from './UnreadNotice';
 
@@ -18,6 +19,7 @@ type ChatWindowProps = {
   graph: Graph;
   graphSize: number;
   station?: unknown;
+  inputRef: React.MutableRefObject<CodeMirrorShim>;
   fetchMessages: (newer: boolean) => Promise<boolean>;
   scrollTo?: BigInteger;
   onReply: (msg: Post) => void;
@@ -211,6 +213,7 @@ class ChatWindow extends Component<
     const {
       showOurContact,
       graph,
+      inputRef,
       onReply,
       onDelete,
       onLike,
@@ -260,6 +263,7 @@ class ChatWindow extends Component<
       isLastRead,
       isLastMessage,
       msg,
+      inputRef,
       ...messageProps
     };
 
@@ -276,12 +280,7 @@ class ChatWindow extends Component<
   });
 
   render() {
-    const {
-      unreadCount,
-      graph,
-      pendingSize = 0
-    } = this.props;
-
+    const { unreadCount, graph, pendingSize = 0 } = this.props;
     const unreadMsg = graph.get(this.state.unreadIndex);
 
     return (

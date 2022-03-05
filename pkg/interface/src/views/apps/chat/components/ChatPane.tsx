@@ -20,15 +20,20 @@ import { LinkCollection } from '../ChatResource';
 interface useChatStoreType {
   id: string;
   message: string;
+  reply: string;
   messageStore: Record<string, string>;
+  replyStore: Record<string, string>;
   restore: (id: string) => void;
   setMessage: (message: string) => void;
+  setReply: (reply: string) => void;
 }
 
 export const useChatStore = create<useChatStoreType>(persist((set, get) => ({
   id: '',
   message: '',
+  reply: '',
   messageStore: {},
+  replyStore: {},
   restore: (id: string) => {
     const store = get().messageStore;
     set({
@@ -42,9 +47,15 @@ export const useChatStore = create<useChatStoreType>(persist((set, get) => ({
     store[get().id] = message;
 
     set({ message, messageStore: store });
+  },
+  setReply: (reply: string) => {
+    const store = get().replyStore;
+    store[get().id] = reply;
+
+    set({ reply, replyStore: store });
   }
 }), {
-  whitelist: ['messageStore'],
+  whitelist: ['messageStore', 'replyStore'],
   name: createStorageKey('chat-unsent'),
   version: storageVersion,
   migrate: clearStorageMigration
@@ -132,7 +143,7 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
   } = props;
   const graphTimesentMap = useGraphTimesent(id);
   const ourContact = useOurContact();
-  const { message, restore, setMessage } = useChatStore();
+  const { message, reply, restore, setReply } = useChatStore();
   const { canUpload, drag } = useFileUpload({
     onSuccess: url => onSubmit([{ url }])
   });
@@ -153,8 +164,7 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
 
   const onReply = useCallback(
     (msg: Post) => {
-      // Prepend the reply reference
-      setMessage(`${props.onReply(msg)}${message || ''}`);
+      setReply(props.onReply(msg));
       inputRef.current.focus();
     },
     [id, message, props.onReply]
@@ -179,7 +189,7 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
         showOurContact={promptShare.length === 0 && !showBanner}
         pendingSize={Object.keys(graphTimesentMap).length}
         scrollTo={scrollTo ? bigInt(scrollTo) : undefined}
-        {...{ graph, unreadCount, onReply, onDelete, onLike, onBookmark, dismissUnread, fetchMessages, isAdmin, getPermalink, collections }}
+        {...{ graph, unreadCount, onReply, onDelete, onLike, onBookmark, dismissUnread, fetchMessages, isAdmin, getPermalink, collections, inputRef, reply }}
       />
       {canWrite && (
         <ChatInput

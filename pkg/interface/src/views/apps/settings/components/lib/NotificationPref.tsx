@@ -113,6 +113,11 @@ export function NotificationPreferences() {
               id="mentions"
               caption="Notify me if someone mentions my @p in a channel I've joined"
             />
+            <Toggle
+              label="Show details in push notifications"
+              id="pushNotificationDetails"
+              caption="Include message text and mention info in push notifications"
+            />
             <Col gapY={3}>
               <Text lineHeight="tall">
                 Activity
