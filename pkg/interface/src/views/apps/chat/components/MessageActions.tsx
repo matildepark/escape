@@ -33,12 +33,14 @@ const MessageActions = ({ onReply, onDelete, onLike, onBookmark, msg, isAdmin, p
   const { associations } = useMetadataState();
   const { bookmarks } = useSettingsState.getState();
   const dark = useDark();
+  const bookmarked = Boolean(bookmarks[permalink]);
+  const [bookmarkSuccess, setBookmarkSuccess] = useState(bookmarked);
+
   const isOwn = () => msg.author === window.ship;
   const { doCopy, copyDisplay } = useCopy(permalink, 'Copy Message Link');
-  const bookmarked = useMemo(() => bookmarks[permalink], [bookmarks]);
   const showCopyMessageLink = Boolean(permalink);
   const showDelete = (isAdmin || isOwn()) && onDelete;
-  const [bookmarkSuccess, setBookmarkSuccess] = useState(false);
+
   const myBookmarksPath = useMemo(() => Object.keys(associations.graph).find((path) => {
     const assoc = associations.graph[path];
     return assoc.group === path && assoc.metadata.title === 'My Bookmarks' && assoc.metadata.config.graph === 'link';
@@ -51,7 +53,7 @@ const MessageActions = ({ onReply, onDelete, onLike, onBookmark, msg, isAdmin, p
   }, [msg, permalink, bookmarked]);
 
   const bookmarkStyle = { height: 15, width: 12, paddingLeft: 1, color: dark ? 'white' : 'black' };
-  const bookmarkIcon = bookmarked
+  const bookmarkIcon = bookmarkSuccess
     ? <BookmarkIconSolid style={bookmarkStyle} className="actionIcon" />
     : <BookmarkIcon style={bookmarkStyle} className="actionIcon" />;
 

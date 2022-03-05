@@ -56,12 +56,22 @@ const LinkWindow = (props: LinkWindowProps) => {
     return isWriter(group, association.resource);
   };
 
+  const { graph, association } = props;
+  const first = graph.peekLargest()?.[0];
+  const [, , ship, name] = association.resource.split('/');
+
+  const graphArray = Array.from(graph).filter(
+    ([idx, node]) => typeof node?.post !== 'string'
+  );
+
+  const orm = new BigIntOrderedMap<GraphNode>().gas(graphArray);
+
   const renderItem = React.forwardRef<HTMLDivElement>(({ index }: RendererProps, ref) => {
-    const { association, graph } = props;
+    const { association } = props;
     const [, , ship, name] = association.resource.split('/');
     // @ts-ignore Uint8Array vs. BigInt mismatch?
-    const node = graph.get(index);
-    const first = graph.peekLargest()?.[0];
+    const node = orm.get(index);
+    const first = orm.peekLargest()?.[0];
     const post = node?.post;
     if (!node || !post) {
       return null;
@@ -102,16 +112,6 @@ const LinkWindow = (props: LinkWindowProps) => {
       </Box>
     );
   });
-
-  const { graph, association } = props;
-  const first = graph.peekLargest()?.[0];
-  const [, , ship, name] = association.resource.split('/');
-
-  const graphArray = Array.from(graph).filter(
-    ([idx, node]) => typeof node?.post !== 'string'
-  );
-
-  const orm = new BigIntOrderedMap<GraphNode>().gas(graphArray);
 
   if (!first) {
     return (

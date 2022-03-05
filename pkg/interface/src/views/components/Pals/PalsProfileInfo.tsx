@@ -11,7 +11,7 @@ import { ModalOverlay } from '../ModalOverlay';
 import { ActionRow } from '../ProfileOverlay';
 
 const formSchema = Yup.object({
-  tag: Yup.string().required('Tag cannot be blank').max(20, 'Max 20 characters')
+  tag: Yup.string().required('Tag cannot be blank').max(20, 'Max 20 characters').lowercase().trim()
 });
 
 export interface TagFormSchema {

@@ -110,8 +110,8 @@ if (changingSort) {
       top="0px"
       pl={3}
       borderBottom='1px solid'
+      borderRight="1px solid"
       borderColor='lightGray'
-      borderRight="1px solid lightGray"
       cursor='pointer'
       onClick={toggleChangingSort}
     >
@@ -132,8 +132,8 @@ return (
     top="0px"
     pl={3}
     borderBottom='1px solid'
+    borderRight="1px solid"
     borderColor='lightGray'
-    borderRight="1px solid lightGray"
   >
     <Col
       bg="white"

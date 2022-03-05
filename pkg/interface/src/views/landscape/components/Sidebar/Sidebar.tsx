@@ -79,7 +79,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
           borderRightColor="lightGray"
           overflowY="scroll"
           fontSize={0}
-          position="relative"
+          position={IS_SMALL_SCREEN ? 'absolute' : 'relative'}
           height={groupsHeight}
           borderBottom={1}
           borderBottomColor="lightGray"
@@ -100,7 +100,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
           borderRightColor="lightGray"
           overflowY="scroll"
           fontSize={0}
-          position="relative"
+          position={IS_SMALL_SCREEN ? 'absolute' : 'relative'}
           height={messagesHeight}
         >
           <SidebarGroupList {...{ config, selected, baseUrl }} messages />

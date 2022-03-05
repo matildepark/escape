@@ -3,12 +3,7 @@ import { BaseImage, Box, Icon, Row, Rule, Text } from '@tlon/indigo-react';
 import { Contact, MentionContent, Post } from '@urbit/api';
 import bigInt from 'big-integer';
 import moment from 'moment';
-import React, {
-  Ref,
-  useCallback,
-  useEffect,
-  useMemo, useState
-} from 'react';
+import React, { Ref, useCallback, useEffect, useMemo, useState } from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
 import { useIdlingState } from '~/logic/lib/idling';
 import { IS_MOBILE } from '~/logic/lib/platform';
@@ -144,6 +139,7 @@ export const MessageAuthor = React.memo<any>(({
             pl={props.transcluded ? '11px' : '12px'}
             cursor='pointer'
             position='relative'
+            overflow="hidden"
           >
             <ProfileOverlay cursor='auto' ship={msg.author}>
               <Row alignItems="center">
@@ -156,6 +152,9 @@ export const MessageAuthor = React.memo<any>(({
                   mono={nameMono}
                   fontWeight={nameMono ? '400' : '500'}
                   cursor='pointer'
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  whiteSpace="nowrap"
                 >
                   {shipName}
                 </Text>
@@ -185,7 +184,7 @@ export const MessageAuthor = React.memo<any>(({
 MessageAuthor.displayName = 'MessageAuthor';
 
 type MessageProps = { timestamp: string; timestampHover: boolean; }
-  & Pick<ChatMessageProps, 'msg' | 'transcluded' | 'showOurContact' | 'isReply' | 'onLike'>
+  & Pick<ChatMessageProps, 'msg' | 'transcluded' | 'showOurContact' | 'isReply' | 'onLike' | 'inputRef'>
 
 export const Message = React.memo(({
   timestamp,
@@ -193,6 +192,7 @@ export const Message = React.memo(({
   timestampHover,
   transcluded,
   showOurContact,
+  inputRef,
   isReply = false
 }: MessageProps) => {
   const { hovering, bind } = useHovering();
@@ -207,7 +207,9 @@ export const Message = React.memo(({
         e.stopPropagation();
         setCollapsed(!collapsed);
       }
-    }}>
+    }}
+    onMouseEnter={() => inputRef?.current?.getInputField().blur()}
+    >
       {defaultCollapsed && (
         <Icon
           ml="12px"
@@ -342,16 +344,17 @@ interface ChatMessageProps {
   isPending?: boolean;
   style?: unknown;
   isLastMessage?: boolean;
-  dismissUnread?: () => void;
   highlighted?: boolean;
   renderSigil?: boolean;
   hideHover?: boolean;
+  showOurContact: boolean;
+  dismissUnread?: () => void;
   innerRef: (el: HTMLDivElement | null) => void;
   onReply?: (msg: Post) => void;
-  showOurContact: boolean;
   onDelete?: () => void;
   onLike?: (msg: Post) => void;
   onBookmark?: (msg: Post, permalink: string, collection: LinkCollection, add: boolean) => void,
+  inputRef: React.MutableRefObject<CodeMirrorShim>,
   collections: LinkCollection[],
 }
 const emptyCallback = () => {};
@@ -367,6 +370,7 @@ function ChatMessage(props: ChatMessageProps) {
     style,
     isLastMessage,
     isAdmin,
+    inputRef,
     showOurContact,
     hideHover,
     dismissUnread = () => null,
@@ -450,7 +454,7 @@ function ChatMessage(props: ChatMessageProps) {
   const message = useMemo(() => (
     <Message
       timestampHover={!renderSigil}
-      {...{ msg, timestamp, transcluded, showOurContact, isReply }}
+      {...{ msg, timestamp, transcluded, showOurContact, isReply, inputRef }}
     />
   ), [renderSigil, msg, timestamp, transcluded, showOurContact]);
 

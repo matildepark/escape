@@ -179,28 +179,30 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     editor.focus();
   }, [editor, message, setMessage, mentionedUsers, setMentionedUsers, memberArray]);
 
-  const onKeyPress = (e: KeyboardEvent, editor: CodeMirrorShim) => {
+  const onKeyPress = useCallback((e: KeyboardEvent, editor: CodeMirrorShim) => {
     if (!editor) {
       return;
     }
 
     const focusedTag = document.activeElement?.nodeName?.toLowerCase();
     const shouldCapture = !(focusedTag === 'textarea' || focusedTag === 'input' || e.metaKey || e.ctrlKey);
-    if(/^[a-z]|[A-Z]$/.test(e.key) && shouldCapture) {
+    if (/^[a-z]|[A-Z]$/.test(e.key) && shouldCapture) {
       editor.focus();
     }
-    if(e.key === 'Escape') {
+    if (e.key === 'Escape') {
       editor.getInputField().blur();
     }
-  };
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'PageUp' || e.key === 'PageDown') {
+      if (!editor.getValue()) {
+        editor.getInputField().blur();
+      }
+    }
+  }, [message]);
 
   useEffect(() => {
     const focusListener = (e: KeyboardEvent) => onKeyPress(e, editorRef.current);
     document.addEventListener('keydown', focusListener);
-
-    return () => {
-      document.removeEventListener('keydown', focusListener);
-    };
+    return () => document.removeEventListener('keydown', focusListener);
   }, []);
 
   useEffect(() => {

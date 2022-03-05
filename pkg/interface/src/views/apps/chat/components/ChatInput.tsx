@@ -1,6 +1,6 @@
-import { Box, Icon, LoadingSpinner, Row } from '@tlon/indigo-react';
+import { Box, Col, Icon, LoadingSpinner, Row, Text } from '@tlon/indigo-react';
 import { Association, Contact, Content, evalCord, Group } from '@urbit/api';
-import React, { FC, PropsWithChildren, useState } from 'react';
+import React, { FC, PropsWithChildren, ReactNode, useCallback, useState } from 'react';
 import tokenizeMessage from '~/logic/lib/tokenizeMessage';
 import { IuseStorage } from '~/logic/lib/useStorage';
 import { MOBILE_BROWSER_REGEX } from '~/logic/lib/util';
@@ -23,9 +23,8 @@ type ChatInputProps = PropsWithChildren<IuseStorage & {
   chatEditor: React.RefObject<CodeMirrorShim>
 }>;
 
-const InputBox: FC = ({ children }) => (
-  <Row
-    alignItems='center'
+const InputBox: FC = ({ isReply, children }: { isReply: boolean; children?: ReactNode; }) => (
+  <Col
     position='relative'
     flexGrow={1}
     flexShrink={0}
@@ -34,9 +33,10 @@ const InputBox: FC = ({ children }) => (
     backgroundColor='white'
     className='cf'
     zIndex={0}
+    height={isReply ? '92px' : 'auto'}
   >
     { children }
-  </Row>
+  </Col>
 );
 
 const IconBox = ({ children, ...props }) => (
@@ -86,10 +86,7 @@ export const ChatInput = React.forwardRef(({
   useImperativeHandle(ref, () => chatEditor.current);
   const [inCodeMode, setInCodeMode] = useState(false);
 
-  const {
-    message,
-    setMessage
-  } = useChatStore();
+  const { message, reply, setMessage, setReply } = useChatStore();
   const { canUpload, uploading, promptUpload, onPaste } = useFileUpload({
     onSuccess: uploadSuccess
   });
@@ -106,8 +103,8 @@ export const ChatInput = React.forwardRef(({
     setInCodeMode(!inCodeMode);
   }
 
-  async function submit() {
-    const text = chatEditor.current?.getValue() || '';
+  const submit = useCallback(async () => {
+    const text = `${reply}${chatEditor.current?.getValue() || ''}`;
 
     if (text === '') {
       return;
@@ -122,51 +119,63 @@ export const ChatInput = React.forwardRef(({
 
     setInCodeMode(false);
     setMessage('');
+    setReply('');
     chatEditor.current.focus();
-  }
+  }, [reply]);
+
+  const isReply = Boolean(reply);
+  const [, patp] = reply.split('\n');
 
   return (
-    <InputBox>
-      <Row p='12px 4px 12px 12px' flexShrink={0} alignItems='center'>
-        <ChatAvatar contact={ourContact} hideAvatars={hideAvatars} />
-      </Row>
-      <ChatEditor
-        ref={chatEditor}
-        inCodeMode={inCodeMode}
-        onPaste={(cm, e) => onPaste(e)}
-        {...{ submit, placeholder, isAdmin, group, association }}
-      />
-      <IconBox mr={canUpload ? '12px' : 3}>
-        <Icon
-          icon='Dojo'
-          cursor='pointer'
-          onClick={toggleCode}
-          color={inCodeMode ? 'blue' : 'black'}
+    <InputBox isReply={isReply}>
+      {(isReply) && (
+        <Row mt={2} ml="12px" p={2} pr="6px " mr="auto" borderRadius={3} backgroundColor="washedGray" cursor='pointer' onClick={() => setReply('')}>
+          <Icon icon="X" size={18} mr={1} />
+          <Text>Replying to <Text mono>{patp}</Text></Text>
+        </Row>
+      )}
+      <Row alignItems='center' position='relative' flexGrow={1} flexShrink={0}>
+        <Row p='12px 4px 12px 12px' flexShrink={0} alignItems='center'>
+          <ChatAvatar contact={ourContact} hideAvatars={hideAvatars} />
+        </Row>
+        <ChatEditor
+          ref={chatEditor}
+          inCodeMode={inCodeMode}
+          onPaste={(cm, e) => onPaste(e)}
+          {...{ submit, placeholder, isAdmin, group, association }}
         />
-      </IconBox>
-      {canUpload && (
-        <IconBox>
-          {uploading ? (
-            <LoadingSpinner />
-          ) : (
-            <Icon
-              icon='Attachment'
-              cursor='pointer'
-              width='16'
-              height='16'
-              onClick={() =>
-                promptUpload().then(url => uploadSuccess(url, 'direct'))
-              }
-            />
-          )}
+        <IconBox mr={canUpload ? '12px' : 3}>
+          <Icon
+            icon='Dojo'
+            cursor='pointer'
+            onClick={toggleCode}
+            color={inCodeMode ? 'blue' : 'black'}
+          />
         </IconBox>
-      )}
-      {MOBILE_BROWSER_REGEX.test(navigator.userAgent) && (
-        <MobileSubmitButton
-          enabled={message !== ''}
-          onSubmit={submit}
-        />
-      )}
+        {canUpload && (
+          <IconBox>
+            {uploading ? (
+              <LoadingSpinner />
+            ) : (
+              <Icon
+                icon='Attachment'
+                cursor='pointer'
+                width='16'
+                height='16'
+                onClick={() =>
+                  promptUpload().then(url => uploadSuccess(url, 'direct'))
+                }
+              />
+            )}
+          </IconBox>
+        )}
+        {MOBILE_BROWSER_REGEX.test(navigator.userAgent) && (
+          <MobileSubmitButton
+            enabled={message !== ''}
+            onSubmit={submit}
+          />
+        )}
+      </Row>
     </InputBox>
   );
 });
