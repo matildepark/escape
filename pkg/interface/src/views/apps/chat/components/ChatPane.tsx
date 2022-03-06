@@ -17,29 +17,42 @@ import { CodeMirrorShim } from './ChatEditor';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import { LinkCollection } from '../ChatResource';
 
+const getMsgText = (msg: Post) => {
+  return msg.contents.reduce((acc, { text, url, code, mention }: any) => {
+    return acc + (text || '') + (url || '') + (code || '') + (mention || '');
+  }, '');
+};
+
 interface useChatStoreType {
   id: string;
   message: string;
+  quotedText: string;
   reply: string;
   messageStore: Record<string, string>;
+  quotedTextStore: Record<string, string>;
   replyStore: Record<string, string>;
   restore: (id: string) => void;
   setMessage: (message: string) => void;
-  setReply: (reply: string) => void;
+  setReply: (reply: string, quotedText?: string) => void;
 }
 
 export const useChatStore = create<useChatStoreType>(persist((set, get) => ({
   id: '',
   message: '',
+  quotedText: '',
   reply: '',
   messageStore: {},
+  quotedTextStore: {},
   replyStore: {},
   restore: (id: string) => {
-    const store = get().messageStore;
+    const mStore = get().messageStore;
+    const rStore = get().replyStore;
     set({
       id,
-      messageStore: store,
-      message: store[id] || ''
+      messageStore: mStore,
+      message: mStore[id] || '',
+      replyStore: rStore,
+      reply: rStore[id] || ''
     });
   },
   setMessage: (message: string) => {
@@ -48,14 +61,16 @@ export const useChatStore = create<useChatStoreType>(persist((set, get) => ({
 
     set({ message, messageStore: store });
   },
-  setReply: (reply: string) => {
-    const store = get().replyStore;
-    store[get().id] = reply;
+  setReply: (reply: string, quotedText = '') => {
+    const rStore = get().replyStore;
+    rStore[get().id] = reply;
+    const qtStore = get().quotedTextStore;
+    qtStore[get().id] = quotedText;
 
-    set({ reply, replyStore: store });
+    set({ reply, quotedText, replyStore: rStore, quotedTextStore: qtStore });
   }
 }), {
-  whitelist: ['messageStore', 'replyStore'],
+  whitelist: ['messageStore', 'replyStore', 'quotedTextStore'],
   name: createStorageKey('chat-unsent'),
   version: storageVersion,
   migrate: clearStorageMigration
@@ -164,7 +179,8 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
 
   const onReply = useCallback(
     (msg: Post) => {
-      setReply(props.onReply(msg));
+      const quotedText = getMsgText(msg);
+      setReply(props.onReply(msg), quotedText);
       inputRef.current.focus();
     },
     [id, message, props.onReply]
@@ -176,7 +192,7 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
 
   return (
     // @ts-ignore bind typings
-    <Col {...drag.bind} height="100%" overflow="hidden" position="relative">
+    <Col {...drag.bind} height="100%" overflow="hidden" position="relative" backgroundColor="white">
       <ShareProfile
         our={ourContact}
         recipients={showBanner ? promptShare : []}

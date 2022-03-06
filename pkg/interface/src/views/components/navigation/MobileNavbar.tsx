@@ -10,6 +10,11 @@ import { bootstrapApi } from '~/logic/api/bootstrap';
 
 const localSel = selectLocalState(['toggleOmnibox']);
 
+export const APP_NAVBAR_HEIGHT = 60;
+export const WEB_NAVBAR_HEIGHT = 50;
+
+export const getNavbarHeight = () => isMobileApp() ? APP_NAVBAR_HEIGHT : WEB_NAVBAR_HEIGHT;
+
 type NavItemIcon = 'Home' | 'Messages' | 'Notifications' | 'ArrowRefresh' | 'Menu';
 
 interface MobileNavItemProps {
@@ -127,7 +132,7 @@ export function MobileNavbar() {
     || 0;
 
   return (
-    <Row className="mobileNavbar" backgroundColor="white" height={isMobileApp() ? '60px' : '50px'}>
+    <Row className="mobileNavbar" backgroundColor="white" height={`${getNavbarHeight()}px`}>
       {options.map(({ icon, to }) => <Link key={icon} to={to} onClick={onClick(icon, to)}>
         <MobileNavItem icon={icon}
           selected={currentPathname.includes(to) && icon !== 'Menu'}
