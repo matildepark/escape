@@ -10,7 +10,7 @@ export interface ParserSettings {
 }
 
 const EMOJI_REGEX = /:[a-z0-9_]+?:/ig;
-const parseEmojis = (text: string) => text.replace(EMOJI_REGEX, match => emoji.getUnicode(match.slice(1, -1)));
+const parseEmojis = (text: string) => text.replace(EMOJI_REGEX, match => emoji.getUnicode(match.slice(1, -1)) || match);
 
 const DISABLED_BLOCK_TOKENS = [
   'indentedCode',

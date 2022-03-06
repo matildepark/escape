@@ -19,16 +19,20 @@ export default function InfoScreen(props: any): ReactElement {
       <Body>
         <Col overflowY="scroll" height="100%" py={3} px={4}>
           <H2>EScape Info</H2>
-          <H3 mt={4}>What&apos;s in v0.2.1</H3>
+          <H3 mt={4}>What&apos;s in v0.2.2</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
           <Text mt={1}>- Add emoji support in chat</Text>
           <Text mt={1}>- When replying to a message, show a reply placeholder instead of the graph url</Text>
           <Text mt={1}>- The arrow keys and up/down page keys scroll by default if no text is entered or if a message has been moused over</Text>
+          <Text mt={1}>- Backspace to clear reply indicator when message is empty</Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
           <Text mt={1}>- If some links in collection are deleted, input isn’t showing up</Text>
           <Text mt={1}>- Sidebar overflows sidebar header on mobile when group is expanded</Text>
           <Text mt={1}>- Better bookmark confirmation</Text>
           <Text mt={1}>- In mobile replies, names with nicknames sometimes overflow on top of the quoted text</Text>
+          <Text mt={1}>- Emoji should have something if “undefined”</Text>
+          <Text mt={1}>- Mobile navbar disappearing</Text>
+          <Text mt={1}>- Indicate which message is being replied to</Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>
           <Row mt={1}>

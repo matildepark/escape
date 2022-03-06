@@ -11,6 +11,7 @@ import { ChatAvatar } from './ChatAvatar';
 import { useChatStore } from './ChatPane';
 import { useImperativeHandle } from 'react';
 import { FileUploadSource, useFileUpload } from '~/logic/lib/useFileUpload';
+import { IS_SMALL_SCREEN } from '~/logic/lib/platform';
 
 type ChatInputProps = PropsWithChildren<IuseStorage & {
   hideAvatars: boolean;
@@ -33,7 +34,7 @@ const InputBox: FC = ({ isReply, children }: { isReply: boolean; children?: Reac
     backgroundColor='white'
     className='cf'
     zIndex={0}
-    height={isReply ? '92px' : 'auto'}
+    height={isReply ? `${IS_SMALL_SCREEN ? 100 : 84}px` : 'auto'}
   >
     { children }
   </Col>
@@ -86,7 +87,7 @@ export const ChatInput = React.forwardRef(({
   useImperativeHandle(ref, () => chatEditor.current);
   const [inCodeMode, setInCodeMode] = useState(false);
 
-  const { message, reply, setMessage, setReply } = useChatStore();
+  const { message, reply, quotedText, setMessage, setReply } = useChatStore();
   const { canUpload, uploading, promptUpload, onPaste } = useFileUpload({
     onSuccess: uploadSuccess
   });
@@ -125,13 +126,14 @@ export const ChatInput = React.forwardRef(({
 
   const isReply = Boolean(reply);
   const [, patp] = reply.split('\n');
+  // TODO: figure out a reply preview
 
   return (
     <InputBox isReply={isReply}>
       {(isReply) && (
-        <Row mt={2} ml="12px" p={2} pr="6px " mr="auto" borderRadius={3} backgroundColor="washedGray" cursor='pointer' onClick={() => setReply('')}>
+        <Row mt={2} ml="12px" p={1} px="6px" mr="auto" borderRadius={3} backgroundColor="washedGray" cursor='pointer' maxWidth="calc(100% - 24px)" onClick={() => setReply('')}>
           <Icon icon="X" size={18} mr={1} />
-          <Text>Replying to <Text mono>{patp}</Text></Text>
+          <Text whiteSpace='nowrap' textOverflow='ellipsis' maxWidth="100%" overflow="hidden">Replying to <Text mono>{patp}</Text> {`"${quotedText}"`}</Text>
         </Row>
       )}
       <Row alignItems='center' position='relative' flexGrow={1} flexShrink={0}>

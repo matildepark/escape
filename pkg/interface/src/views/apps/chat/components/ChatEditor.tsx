@@ -160,7 +160,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
   const [disableAutocomplete, setDisableAutocomplete] = useState(false);
   const memberArray = useMemo(() => [...(group?.members || [])], [group]);
   const disableSpellcheck = useSettingsState(s => s.calm.disableSpellcheck);
-  const { message, setMessage } = useChatStore();
+  const { message, setMessage, setReply } = useChatStore();
 
   const selectMember = useCallback((patp: string) => () => {
     const replaceText = (text, regex, set) => {
@@ -184,18 +184,15 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
       return;
     }
 
+    if (e.key === 'Escape') {
+      editor.getInputField().blur();
+      return;
+    }
+
     const focusedTag = document.activeElement?.nodeName?.toLowerCase();
     const shouldCapture = !(focusedTag === 'textarea' || focusedTag === 'input' || e.metaKey || e.ctrlKey);
     if (/^[a-z]|[A-Z]$/.test(e.key) && shouldCapture) {
       editor.focus();
-    }
-    if (e.key === 'Escape') {
-      editor.getInputField().blur();
-    }
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'PageUp' || e.key === 'PageDown') {
-      if (!editor.getValue()) {
-        editor.getInputField().blur();
-      }
     }
   }, [message]);
 
@@ -291,6 +288,9 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     theme: 'tlon' + codeTheme,
     placeholder: inCodeMode ? 'Code...' : placeholder,
     extraKeys: {
+      'Backspace': editor && !editor.getValue() ? (() => {
+        setReply('');
+      }) : undefined,
       'Up': hasSuggestions ? (() => {
         if (mentionCursor > 0) {
           setMentionCursor(mentionCursor - 1);

@@ -10,9 +10,12 @@ import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 import { getGroupFromWorkspace } from '~/logic/lib/workspace';
 import useGroupState from '~/logic/state/group';
 import { Workspace } from '~/types';
+import { getNavbarHeight } from '~/views/components/navigation/MobileNavbar';
 import { GroupSwitcher } from '../GroupSwitcher';
 import { SidebarGroupList } from './SidebarGroupList';
 import { SidebarListConfig } from './types';
+
+export const HEADER_HEIGHT = 47;
 
 const ScrollbarLessCol = styled(Col)`
   scrollbar-width: none !important;
@@ -43,6 +46,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
   );
 
   const groups = useGroupState(state => state.groups);
+  const navbarHeight = getNavbarHeight();
 
   const role = groups?.[groupPath] ? roleForShip(groups[groupPath], window.ship) : undefined;
   const isAdmin = (role === 'admin') || (workspace?.type === 'home');
@@ -50,9 +54,9 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
   let groupsHeight = 'calc(75% - 23px)';
   let messagesHeight = 'calc(25% - 24px)';
   if (IS_SMALL_SCREEN && focusMessages) {
-    messagesHeight = 'calc(100% - 47px)';
+    messagesHeight = `calc(100% - ${navbarHeight + HEADER_HEIGHT}px)`;
   } else if (IS_SMALL_SCREEN) {
-    groupsHeight = 'calc(100% - 47px)';
+    groupsHeight = `calc(100% - ${navbarHeight + HEADER_HEIGHT}px)`;
   } else if (focusMessages) {
     groupsHeight = 'calc(50% - 24px)';
     messagesHeight = 'calc(50% - 23px)';
