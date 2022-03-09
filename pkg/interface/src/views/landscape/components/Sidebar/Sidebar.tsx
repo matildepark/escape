@@ -5,7 +5,7 @@ import {
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { roleForShip } from '~/logic/lib/group';
-import { IS_SMALL_SCREEN } from '~/logic/lib/platform';
+import { IS_MOBILE, IS_SHORT_SCREEN } from '~/logic/lib/platform';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 import { getGroupFromWorkspace } from '~/logic/lib/workspace';
 import useGroupState from '~/logic/state/group';
@@ -15,7 +15,7 @@ import { GroupSwitcher } from '../GroupSwitcher';
 import { SidebarGroupList } from './SidebarGroupList';
 import { SidebarListConfig } from './types';
 
-export const HEADER_HEIGHT = 47;
+export const HEADER_HEIGHT = 48;
 
 const ScrollbarLessCol = styled(Col)`
   scrollbar-width: none !important;
@@ -47,19 +47,20 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
 
   const groups = useGroupState(state => state.groups);
   const navbarHeight = getNavbarHeight();
+  const isSmallScreen = IS_MOBILE || IS_SHORT_SCREEN;
 
   const role = groups?.[groupPath] ? roleForShip(groups[groupPath], window.ship) : undefined;
   const isAdmin = (role === 'admin') || (workspace?.type === 'home');
   const focusMessages = props.baseUrl.includes('~landscape/messages');
-  let groupsHeight = 'calc(75% - 23px)';
-  let messagesHeight = 'calc(25% - 24px)';
-  if (IS_SMALL_SCREEN && focusMessages) {
-    messagesHeight = `calc(100% - ${navbarHeight + HEADER_HEIGHT}px)`;
-  } else if (IS_SMALL_SCREEN) {
-    groupsHeight = `calc(100% - ${navbarHeight + HEADER_HEIGHT}px)`;
+  let groupsHeight = `calc(75% - ${HEADER_HEIGHT / 2}px)`;
+  let messagesHeight = `calc(25% - ${HEADER_HEIGHT / 2}px)`;
+  if (isSmallScreen && focusMessages) {
+    messagesHeight = `calc(100% - ${(IS_SHORT_SCREEN ? 0 : navbarHeight) + HEADER_HEIGHT}px)`;
+  } else if (isSmallScreen) {
+    groupsHeight = `calc(100% - ${(IS_SHORT_SCREEN ? 0 : navbarHeight) + HEADER_HEIGHT}px)`;
   } else if (focusMessages) {
-    groupsHeight = 'calc(50% - 24px)';
-    messagesHeight = 'calc(50% - 23px)';
+    groupsHeight = `calc(50% - ${HEADER_HEIGHT / 2}px)`;
+    messagesHeight = `calc(50% - ${HEADER_HEIGHT / 2}px)`;
   }
 
   return (
@@ -72,7 +73,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
         changingSort={changingSort}
         toggleChangingSort={() => setChangingSort(!changingSort)}
       />
-      {(!IS_SMALL_SCREEN || !focusMessages) && (
+      {(!isSmallScreen || !focusMessages) && (
         <ScrollbarLessCol
           display="flex"
           width="100%"
@@ -83,7 +84,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
           borderRightColor="lightGray"
           overflowY="scroll"
           fontSize={0}
-          position={IS_SMALL_SCREEN ? 'absolute' : 'relative'}
+          position={IS_MOBILE ? 'absolute' : 'relative'}
           height={groupsHeight}
           borderBottom={1}
           borderBottomColor="lightGray"
@@ -93,7 +94,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
           <SidebarGroupList {...{ config, selected, baseUrl, changingSort }} />
         </ScrollbarLessCol>
       )}
-      {(!IS_SMALL_SCREEN || focusMessages) && (
+      {(!isSmallScreen || focusMessages) && (
         <ScrollbarLessCol
           display="flex"
           width="100%"
@@ -104,7 +105,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
           borderRightColor="lightGray"
           overflowY="scroll"
           fontSize={0}
-          position={IS_SMALL_SCREEN ? 'absolute' : 'relative'}
+          position={IS_MOBILE ? 'absolute' : 'relative'}
           height={messagesHeight}
         >
           <SidebarGroupList {...{ config, selected, baseUrl }} messages />

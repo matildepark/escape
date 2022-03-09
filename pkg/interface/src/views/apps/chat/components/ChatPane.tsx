@@ -1,20 +1,18 @@
+import React, { ReactElement, useCallback, useEffect, useState, useRef } from 'react';
+import bigInt, { BigInteger } from 'big-integer';
 import { Col } from '@tlon/indigo-react';
 import { Association, Content, Graph, Group, Post } from '@urbit/api';
-import bigInt, { BigInteger } from 'big-integer';
-import React, { ReactElement, useCallback, useEffect, useState, useRef } from 'react';
-import create from 'zustand';
-import { persist } from 'zustand/middleware';
 import { useFileUpload } from '~/logic/lib/useFileUpload';
-import { createStorageKey, storageVersion, clearStorageMigration } from '~/logic/lib/util';
 import { useOurContact } from '~/logic/state/contact';
 import { useGraphTimesent } from '~/logic/state/graph';
 import ShareProfile from '~/views/apps/chat/components/ShareProfile';
 import { Loading } from '~/views/components/Loading';
 import SubmitDragger from '~/views/components/SubmitDragger';
+import { IS_MOBILE } from '~/logic/lib/platform';
+import { useChatStore, useReplyStore } from '~/logic/state/chat';
 import ChatInput from './ChatInput';
 import ChatWindow from './ChatWindow';
 import { CodeMirrorShim } from './ChatEditor';
-import { IS_MOBILE } from '~/logic/lib/platform';
 import { LinkCollection } from '../ChatResource';
 
 const getMsgText = (msg: Post) => {
@@ -22,59 +20,6 @@ const getMsgText = (msg: Post) => {
     return acc + (text || '') + (url || '') + (code || '') + (mention || '');
   }, '');
 };
-
-interface useChatStoreType {
-  id: string;
-  message: string;
-  quotedText: string;
-  reply: string;
-  messageStore: Record<string, string>;
-  quotedTextStore: Record<string, string>;
-  replyStore: Record<string, string>;
-  restore: (id: string) => void;
-  setMessage: (message: string) => void;
-  setReply: (reply: string, quotedText?: string) => void;
-}
-
-export const useChatStore = create<useChatStoreType>(persist((set, get) => ({
-  id: '',
-  message: '',
-  quotedText: '',
-  reply: '',
-  messageStore: {},
-  quotedTextStore: {},
-  replyStore: {},
-  restore: (id: string) => {
-    const mStore = get().messageStore;
-    const rStore = get().replyStore;
-    set({
-      id,
-      messageStore: mStore,
-      message: mStore[id] || '',
-      replyStore: rStore,
-      reply: rStore[id] || ''
-    });
-  },
-  setMessage: (message: string) => {
-    const store = get().messageStore;
-    store[get().id] = message;
-
-    set({ message, messageStore: store });
-  },
-  setReply: (reply: string, quotedText = '') => {
-    const rStore = get().replyStore;
-    rStore[get().id] = reply;
-    const qtStore = get().quotedTextStore;
-    qtStore[get().id] = quotedText;
-
-    set({ reply, quotedText, replyStore: rStore, quotedTextStore: qtStore });
-  }
-}), {
-  whitelist: ['messageStore', 'replyStore', 'quotedTextStore'],
-  name: createStorageKey('chat-unsent'),
-  version: storageVersion,
-  migrate: clearStorageMigration
-}));
 
 interface ChatPaneProps {
   /**
@@ -158,7 +103,8 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
   } = props;
   const graphTimesentMap = useGraphTimesent(id);
   const ourContact = useOurContact();
-  const { message, reply, restore, setReply } = useChatStore();
+  const { message, restore } = useChatStore();
+  const { reply, restore: restoreReply, setReply } = useReplyStore();
   const { canUpload, drag } = useFileUpload({
     onSuccess: url => onSubmit([{ url }])
   });
@@ -168,6 +114,7 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
 
   useEffect(() => {
     restore(id);
+    restoreReply(id);
     if (!IS_MOBILE) {
       inputRef.current?.focus();
     }
@@ -179,8 +126,7 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
 
   const onReply = useCallback(
     (msg: Post) => {
-      const quotedText = getMsgText(msg);
-      setReply(props.onReply(msg), quotedText);
+      setReply(props.onReply(msg), getMsgText(msg));
       inputRef.current.focus();
     },
     [id, message, props.onReply]

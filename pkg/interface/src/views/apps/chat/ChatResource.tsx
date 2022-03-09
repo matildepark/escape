@@ -146,7 +146,7 @@ const ChatResource = (props: ChatResourceProps): ReactElement => {
   const onSubmit = useCallback((contents: Content[]) => {
     const { ship, name } = resourceFromPath(resource);
     addPost(ship, name, createPost(window.ship, contents));
-  }, [resource, addPost]);
+  }, [resource, addPost, createPost]);
 
   const onDelete = useCallback((msg: Post) => {
     const { ship, name } = resourceFromPath(resource);
@@ -156,7 +156,7 @@ const ChatResource = (props: ChatResourceProps): ReactElement => {
   const onLike = useCallback(async ({ author, signatures, index }: Post) => {
     if (window.ship !== author) {
       const { ship, name } = resourceFromPath(resource);
-      const remove = signatures.find(({ ship }) => ship === window.ship);
+      const remove = signatures.find(({ ship }: any) => ship === window.ship);
 
       const body = remove
         ? {

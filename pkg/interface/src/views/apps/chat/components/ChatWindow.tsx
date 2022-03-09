@@ -201,7 +201,7 @@ class ChatWindow extends Component<
   scrollToEnd = () => this.virtualList?.resetScroll();
 
   onScroll = (event: SyntheticEvent<HTMLDListElement, Event>) => {
-    const scrollTop = event.target.scrollTop;
+    const scrollTop = (event.target as any).scrollTop;
     if (!this.state.idle && scrollTop > IDLE_THRESHOLD) {
       this.setState({ idle: true });
     }
