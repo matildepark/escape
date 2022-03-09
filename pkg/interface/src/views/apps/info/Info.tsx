@@ -1,11 +1,9 @@
-import { Action, Box, Col, H2, H3, Icon, Row, Text } from '@tlon/indigo-react';
-import React, { ReactElement, ReactNode, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import Helmet from 'react-helmet';
-import { Link, Route, Switch, useHistory, useLocation } from 'react-router-dom';
-import BookmarkIcon from '~/assets/img/bookmark.svg';
-import useHarkState from '~/logic/state/hark';
+import { Col, H2, H3, Icon, Row, Text } from '@tlon/indigo-react';
 import { useDark } from '~/logic/state/join';
 import { Body } from '~/views/components/Body';
+import BookmarkIcon from '~/assets/img/bookmark.svg';
 
 export default function InfoScreen(props: any): ReactElement {
   const dark = useDark();
@@ -19,12 +17,15 @@ export default function InfoScreen(props: any): ReactElement {
       <Body>
         <Col overflowY="scroll" height="100%" py={3} px={4}>
           <H2>EScape Info</H2>
-          <H3 mt={4}>What&apos;s in v0.2.2</H3>
+          <H3 mt={4}>What&apos;s in v0.2.3</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
-          <Text mt={1}>- Add emoji support in chat</Text>
           <Text mt={1}>- When replying to a message, show a reply placeholder instead of the graph url</Text>
           <Text mt={1}>- The arrow keys and up/down page keys scroll by default if no text is entered or if a message has been moused over</Text>
           <Text mt={1}>- Backspace to clear reply indicator when message is empty</Text>
+          <Text mt={1}>- Copy message reply in DM</Text>
+          <Text mt={1}>- Emoji picker</Text>
+          <Text mt={1}>- Add emoji support in chat</Text>
+          <Text mt={1}></Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
           <Text mt={1}>- If some links in collection are deleted, input isn’t showing up</Text>
           <Text mt={1}>- Sidebar overflows sidebar header on mobile when group is expanded</Text>
@@ -33,6 +34,9 @@ export default function InfoScreen(props: any): ReactElement {
           <Text mt={1}>- Emoji should have something if “undefined”</Text>
           <Text mt={1}>- Mobile navbar disappearing</Text>
           <Text mt={1}>- Indicate which message is being replied to</Text>
+          <Text mt={1}>- Fix layout on screens ~780px</Text>
+          <Text mt={1}>- Hide the mention popup after submit on mobile</Text>
+          <Text mt={1}></Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>
           <Row mt={1}>

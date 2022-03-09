@@ -1,17 +1,17 @@
+import React, { FC, PropsWithChildren, ReactNode, useCallback, useState, useImperativeHandle, MouseEvent } from 'react';
+import Picker from 'emoji-picker-react';
 import { Box, Col, Icon, LoadingSpinner, Row, Text } from '@tlon/indigo-react';
 import { Association, Contact, Content, evalCord, Group } from '@urbit/api';
-import React, { FC, PropsWithChildren, ReactNode, useCallback, useState } from 'react';
 import tokenizeMessage from '~/logic/lib/tokenizeMessage';
 import { IuseStorage } from '~/logic/lib/useStorage';
 import { MOBILE_BROWSER_REGEX } from '~/logic/lib/util';
 import { withLocalState } from '~/logic/state/local';
-import ChatEditor, { CodeMirrorShim } from './ChatEditor';
 import airlock from '~/logic/api';
-import { ChatAvatar } from './ChatAvatar';
-import { useChatStore } from './ChatPane';
-import { useImperativeHandle } from 'react';
+import { useChatStore, useReplyStore } from '~/logic/state/chat';
 import { FileUploadSource, useFileUpload } from '~/logic/lib/useFileUpload';
-import { IS_SMALL_SCREEN } from '~/logic/lib/platform';
+import { IS_MOBILE } from '~/logic/lib/platform';
+import ChatEditor, { CodeMirrorShim, isMobile } from './ChatEditor';
+// import { ChatAvatar } from './ChatAvatar';
 
 type ChatInputProps = PropsWithChildren<IuseStorage & {
   hideAvatars: boolean;
@@ -24,7 +24,7 @@ type ChatInputProps = PropsWithChildren<IuseStorage & {
   chatEditor: React.RefObject<CodeMirrorShim>
 }>;
 
-const InputBox: FC = ({ isReply, children }: { isReply: boolean; children?: ReactNode; }) => (
+const InputBox: FC<{ isReply: boolean; children?: ReactNode; }> = ({ isReply, children }) => (
   <Col
     position='relative'
     flexGrow={1}
@@ -34,7 +34,7 @@ const InputBox: FC = ({ isReply, children }: { isReply: boolean; children?: Reac
     backgroundColor='white'
     className='cf'
     zIndex={0}
-    height={isReply ? `${IS_SMALL_SCREEN ? 100 : 84}px` : 'auto'}
+    height={isReply ? `${IS_MOBILE ? 100 : 84}px` : 'auto'}
   >
     { children }
   </Col>
@@ -86,8 +86,10 @@ export const ChatInput = React.forwardRef(({
   // const chatEditor = useRef<CodeMirrorShim>(null);
   useImperativeHandle(ref, () => chatEditor.current);
   const [inCodeMode, setInCodeMode] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  const { message, reply, quotedText, setMessage, setReply } = useChatStore();
+  const { message, setMessage } = useChatStore();
+  const { reply, setReply } = useReplyStore();
   const { canUpload, uploading, promptUpload, onPaste } = useFileUpload({
     onSuccess: uploadSuccess
   });
@@ -105,11 +107,10 @@ export const ChatInput = React.forwardRef(({
   }
 
   const submit = useCallback(async () => {
-    const text = `${reply}${chatEditor.current?.getValue() || ''}`;
+    const text = `${reply.link}${chatEditor.current?.getValue() || ''}`;
 
-    if (text === '') {
+    if (text === '')
       return;
-    }
 
     if (inCodeMode) {
       const output = await airlock.thread<string[]>(evalCord(text));
@@ -120,31 +121,59 @@ export const ChatInput = React.forwardRef(({
 
     setInCodeMode(false);
     setMessage('');
-    setReply('');
+    setReply();
     chatEditor.current.focus();
   }, [reply]);
 
-  const isReply = Boolean(reply);
-  const [, patp] = reply.split('\n');
-  // TODO: figure out a reply preview
+  const onEmojiClick = (event, emojiObject) => {
+    if (isMobile) {
+      const cursor = chatEditor?.current.getCursor();
+      const value = chatEditor?.current.getValue();
+      const newValue = `${value.slice(0, cursor)}${emojiObject.emoji}${value.slice(cursor)}`;
+      chatEditor?.current.setValue(newValue);
+      setMessage(newValue);
+    } else {
+      const doc = chatEditor?.current.getDoc();
+      const cursor = doc.getCursor();
+      doc.replaceRange(emojiObject.emoji, cursor);
+    }
+
+    setShowEmojiPicker(false);
+  };
+
+  const closeEmojiPicker = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setShowEmojiPicker(false);
+  };
+
+  const isReply = Boolean(reply.link);
+  const [, patp] = reply.link.split('\n');
 
   return (
     <InputBox isReply={isReply}>
       {(isReply) && (
         <Row mt={2} ml="12px" p={1} px="6px" mr="auto" borderRadius={3} backgroundColor="washedGray" cursor='pointer' maxWidth="calc(100% - 24px)" onClick={() => setReply('')}>
           <Icon icon="X" size={18} mr={1} />
-          <Text whiteSpace='nowrap' textOverflow='ellipsis' maxWidth="100%" overflow="hidden">Replying to <Text mono>{patp}</Text> {`"${quotedText}"`}</Text>
+          <Text whiteSpace='nowrap' textOverflow='ellipsis' maxWidth="100%" overflow="hidden">Replying to <Text mono>{patp}</Text> {`"${reply.content}"`}</Text>
         </Row>
       )}
+      {showEmojiPicker && (
+        <Box position="absolute" bottom="42px" backgroundColor="white" borderRadius={4}>
+          <Box position="fixed" top="0" bottom="0" left="0" right="0" background="transparent" onClick={closeEmojiPicker} />
+          <Picker onEmojiClick={onEmojiClick} />
+        </Box>
+      )}
       <Row alignItems='center' position='relative' flexGrow={1} flexShrink={0}>
-        <Row p='12px 4px 12px 12px' flexShrink={0} alignItems='center'>
-          <ChatAvatar contact={ourContact} hideAvatars={hideAvatars} />
+        <Row cursor='pointer' p='8px 4px 12px 8px' flexShrink={0} alignItems='center' onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+          {/* <ChatAvatar contact={ourContact} hideAvatars={hideAvatars} /> */}
+          <Text fontSize="28px" lineHeight="0.75">&#9786;</Text>
         </Row>
         <ChatEditor
           ref={chatEditor}
           inCodeMode={inCodeMode}
           onPaste={(cm, e) => onPaste(e)}
-          {...{ submit, placeholder, isAdmin, group, association }}
+          {...{ submit, placeholder, isAdmin, group, association, setShowEmojiPicker }}
         />
         <IconBox mr={canUpload ? '12px' : 3}>
           <Icon

@@ -1,15 +1,16 @@
 /* eslint-disable max-lines-per-function */
-import { Box, Col, Icon, Row, Text } from '@tlon/indigo-react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { Box, Col, Icon, Row, Text } from '@tlon/indigo-react';
 import { useCopy } from '~/logic/lib/useCopy';
 import { Dropdown } from '~/views/components/Dropdown';
 import BookmarkIcon from '~/assets/img/bookmark.svg';
 import BookmarkIconSolid from '~/assets/img/bookmark-fill.svg';
 import useMetadataState from '~/logic/state/metadata';
-import './MessageActions.scss';
-import { LinkCollection } from '../ChatResource';
 import useSettingsState from '~/logic/state/settings';
 import { useDark } from '~/logic/state/join';
+import { quoteReply } from '~/logic/util/messages';
+import './MessageActions.scss';
+import { LinkCollection } from '../ChatResource';
 
 const MessageActionItem = ({ onClick, color, children }: { onClick: () => void; color?: string; children: any }) => {
   return (
@@ -37,8 +38,9 @@ const MessageActions = ({ onReply, onDelete, onLike, onBookmark, msg, isAdmin, p
   const [bookmarkSuccess, setBookmarkSuccess] = useState(bookmarked);
 
   const isOwn = () => msg.author === window.ship;
-  const { doCopy, copyDisplay } = useCopy(permalink, 'Copy Message Link');
-  const showCopyMessageLink = Boolean(permalink);
+  const isDm = window.location.pathname.includes('~landscape/messages/dm');
+
+  const { doCopy, copyDisplay } = useCopy(isDm ? quoteReply(msg) : permalink, `Copy Message ${isDm ? 'Reply' : 'Link'}`);
   const showDelete = (isAdmin || isOwn()) && onDelete;
 
   const myBookmarksPath = useMemo(() => Object.keys(associations.graph).find((path) => {
@@ -148,11 +150,9 @@ const MessageActions = ({ onReply, onDelete, onLike, onBookmark, msg, isAdmin, p
               {/* <MessageActionItem onClick={e => console.log(e)}>
                 View Signature
               </MessageActionItem> */}
-              {showCopyMessageLink && (
-                <MessageActionItem onClick={doCopy}>
-                  {copyDisplay}
-                </MessageActionItem>
-              )}
+              <MessageActionItem onClick={doCopy}>
+                {copyDisplay}
+              </MessageActionItem>
               {showDelete && (
                 <MessageActionItem onClick={() => onDelete(msg)} color='red'>
                   Delete Message

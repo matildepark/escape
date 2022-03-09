@@ -1,18 +1,18 @@
-import { acceptDm, cite, Content, declineDm, deSig, Post } from '@urbit/api';
 import React, { useCallback, useEffect } from 'react';
-import _ from 'lodash';
 import bigInt from 'big-integer';
-import { Box, Row, Col, Text, Center } from '@tlon/indigo-react';
+import shallow from 'zustand/shallow';
 import { Link, useHistory } from 'react-router-dom';
 import { patp2dec } from 'urbit-ob';
+import { acceptDm, cite, Content, declineDm, deSig } from '@urbit/api';
+import { Box, Row, Col, Text, Center } from '@tlon/indigo-react';
 import { useContact } from '~/logic/state/contact';
 import useGraphState, { useDM } from '~/logic/state/graph';
 import useHarkState, { useHarkDm } from '~/logic/state/hark';
 import useSettingsState, { selectCalmState } from '~/logic/state/settings';
-import { ChatPane } from './components/ChatPane';
-import shallow from 'zustand/shallow';
 import airlock from '~/logic/api';
 import { StatelessAsyncAction } from '~/views/components/StatelessAsyncAction';
+import { quoteReply } from '~/logic/util/messages';
+import { ChatPane } from './components/ChatPane';
 
 interface DmResourceProps {
   ship: string;
@@ -27,27 +27,6 @@ const getCurrDmSize = (ship: string) => {
   const shipGraph = graph.get(bigInt(patp2dec(ship)));
   return shipGraph?.children?.size ?? 0;
 };
-
-function quoteReply(post: Post) {
-  const reply = _.reduce(
-    post.contents,
-    (acc, content) => {
-      if ('text' in content) {
-        return `${acc}${content.text}`;
-      } else if ('url' in content) {
-        return `${acc}${content.url}`;
-      } else if ('mention' in content) {
-        return `${acc}${content.mention}`;
-      }
-      return acc;
-    },
-    ''
-  )
-    .split('\n')
-    .map(l => `> ${l}`)
-    .join('\n');
-  return `${reply}\n\n~${post.author}:`;
-}
 
 export function DmResource(props: DmResourceProps) {
   const { ship } = props;

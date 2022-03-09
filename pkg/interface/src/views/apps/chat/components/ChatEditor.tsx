@@ -1,4 +1,5 @@
 /* eslint-disable max-lines-per-function */
+import React, { useRef, useState, ClipboardEvent, useEffect, useImperativeHandle, useCallback, useMemo } from 'react';
 import { BaseTextArea, Box, Row } from '@tlon/indigo-react';
 import { Association, Group, invite } from '@urbit/api';
 import * as ob from 'urbit-ob';
@@ -6,17 +7,16 @@ import 'codemirror/addon/display/placeholder';
 import 'codemirror/addon/hint/show-hint';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/markdown/markdown';
-import React, { useRef, useState, ClipboardEvent, useEffect, useImperativeHandle, useCallback, useMemo } from 'react';
 import { Controlled as CodeEditor } from 'react-codemirror2';
 import styled from 'styled-components';
 import { MOBILE_BROWSER_REGEX } from '~/logic/lib/util';
 import useSettingsState from '~/logic/state/settings';
 import { resourceFromPath } from '~/logic/lib/group';
 import airlock from '~/logic/api';
-import '../css/custom.css';
-import { useChatStore } from './ChatPane';
 import { useDark } from '~/logic/state/join';
+import { useChatStore, useReplyStore } from '~/logic/state/chat';
 import { AutocompletePatp } from './AutocompletePatp';
+import '../css/custom.css';
 
 export const SIG_REGEX = /(?:^|\s)(~)(?=\s|$)/;
 export const MENTION_REGEX = /(?:^|\s)(~)(?![a-z]{6}\-[a-z]{6}[?=\s|$])(?![a-z]{6}[?=\s|$])([a-z\-]+)(?=\s|$)/;
@@ -87,6 +87,9 @@ const inputProxy = input => new Proxy(input, {
     if (property === 'element') {
       return input;
     }
+    if (property === 'getCursor') {
+      return () => target.selectionStart;
+    }
   }
 });
 
@@ -123,6 +126,7 @@ interface ChatEditorProps {
   placeholder: string;
   submit: () => void;
   onPaste: (codemirrorInstance, event: ClipboardEvent) => void;
+  setShowEmojiPicker: (show: boolean) => void;
   isAdmin: boolean;
   group: Group;
   association: Association;
@@ -135,6 +139,8 @@ export interface CodeMirrorShim {
   execCommand: (string) => void;
   getValue: () => string;
   getInputField: () => HTMLInputElement;
+  getCursor: () => number;
+  getDoc: () => any;
   element: HTMLElement;
 }
 
@@ -143,6 +149,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
   placeholder,
   submit,
   onPaste,
+  setShowEmojiPicker,
   isAdmin,
   group,
   association
@@ -160,7 +167,8 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
   const [disableAutocomplete, setDisableAutocomplete] = useState(false);
   const memberArray = useMemo(() => [...(group?.members || [])], [group]);
   const disableSpellcheck = useSettingsState(s => s.calm.disableSpellcheck);
-  const { message, setMessage, setReply } = useChatStore();
+  const { message, setMessage } = useChatStore();
+  const { setReply } = useReplyStore();
 
   const selectMember = useCallback((patp: string) => () => {
     const replaceText = (text, regex, set) => {
@@ -185,6 +193,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     }
 
     if (e.key === 'Escape') {
+      setShowEmojiPicker(false);
       editor.getInputField().blur();
       return;
     }
@@ -337,6 +346,15 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     }
   }, [enteredUser, invitedUsers, setInvitedUsers]);
 
+  const focusMobileInput = () => {
+    setTimeout(() => {
+      if (!editorRef?.current?.getValue()) {
+        setDisableAutocomplete(false);
+        setAutocompleteValues(false, [], '');
+      }
+    }, 10);
+  };
+
   return (
     <Row
       backgroundColor='white'
@@ -405,6 +423,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
                   return;
                 editorRef.current = inputProxy(input);
               }}
+              onFocus={focusMobileInput}
             />
           </MobileBox>
         : <CodeEditor
