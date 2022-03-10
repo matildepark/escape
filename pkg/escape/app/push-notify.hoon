@@ -184,14 +184,7 @@
       :~  ['Content-Type' 'application/json']
       ==
     =/  note=notification  +.upd
-    =/  json-title=@t
-      %+  rap  3
-      %+  turn  title.body.note
-      |=  content=[?(%ship %text) @]
-      ^-  @t
-      ?:  ?=(%text -.content)
-        +.content
-      (scot %p +.content)
+    =/  title=@t  (contents-to-cord title.body.note)
     =|  =request:http
      =:  method.request       %'POST'
          url.request          'https://exp.host/--/api/v2/push/send'
@@ -202,7 +195,7 @@
        %-  en-json:html
        %-  pairs:enjs:format
        :~  to+s+p.val.data
-           title+s+json-title
+           title+s+title
            :-  %data
            %-  pairs:enjs:format
            :~  redirect+s+(get-notification-redirect link.body.note)
@@ -211,6 +204,18 @@
     ==
     [~[[%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]] state]
   ==
+::
+++  contents-to-cord
+  |=  contents=(list contents)
+  %+  rap  3
+  %+  turn  contents
+  |=  [type=?(%ship %text) content=@]
+  ^-  @t
+  ?:  ?=(%ship type)
+    (scot %p content)
+  ?.  =('New messages from ' content)
+    content
+  'New DM from '
 ::
 ++  get-notification-redirect
   |=  link=path
