@@ -186,21 +186,21 @@
     =/  note=notification  +.upd
     =/  title=@t  (contents-to-cord title.body.note)
     =|  =request:http
-     =:  method.request       %'POST'
-         url.request          'https://exp.host/--/api/v2/push/send'
-         header-list.request  header-list
-         body.request
-       :-  ~
-       %-  as-octt:mimes:html
-       %-  en-json:html
-       %-  pairs:enjs:format
-       :~  to+s+p.val.data
-           title+s+title
-           :-  %data
-           %-  pairs:enjs:format
-           :~  redirect+s+(get-notification-redirect link.body.note)
-               ship+s+(scot %p our.bowl)
-       ==  ==
+    =:  method.request       %'POST'
+        url.request          'https://exp.host/--/api/v2/push/send'
+        header-list.request  header-list
+        body.request
+      :-  ~
+      %-  as-octt:mimes:html
+      %-  en-json:html
+      %-  pairs:enjs:format
+      :~  to+s+p.val.data
+          title+s+title
+          :-  %data
+          %-  pairs:enjs:format
+          :~  redirect+s+(get-notification-redirect link.body.note)
+              ship+s+(scot %p our.bowl)
+      ==  ==
     ==
     [~[[%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]] state]
   ==
