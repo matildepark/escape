@@ -135,9 +135,9 @@ export function ResourceSkeleton(props: ResourceSkeletonProps): ReactElement {
   const titleText = IS_MOBILE && workspace === association.group
   ? (
     <Row width="100%">
-      <Text maxWidth="38%" textOverflow='ellipsis' overflow='hidden' whiteSpace='nowrap' fontWeight={600} fontSize="14px">{associations.groups[workspace]?.metadata?.title}</Text>
+      <Text maxWidth="33%" textOverflow='ellipsis' overflow='hidden' whiteSpace='nowrap' fontWeight={600} fontSize="14px">{associations.groups[workspace]?.metadata?.title}</Text>
       <Text fontWeight={600} fontSize="14px" mx={1}>{'>'}</Text>
-      <Text maxWidth="38%" textOverflow='ellipsis' overflow='hidden' whiteSpace='nowrap' fontWeight={600} fontSize="14px">{title}</Text>
+      <Text maxWidth="33%" textOverflow='ellipsis' overflow='hidden' whiteSpace='nowrap' fontWeight={600} fontSize="14px">{title}</Text>
     </Row>
   ) : (
     <Text
@@ -203,7 +203,7 @@ export function ResourceSkeleton(props: ResourceSkeletonProps): ReactElement {
         </Dropdown>
       ) : canWrite ? (
         <Link to={resourcePath('/new')}>
-          <Text bold pr='3' color='blue'>
+          <Text bold pr={2} color='blue'>
             + New Post
           </Text>
         </Link>
@@ -241,7 +241,7 @@ export function ResourceSkeleton(props: ResourceSkeletonProps): ReactElement {
         <Box
           display='flex'
           alignItems='baseline'
-          width={`calc(100% - ${actionsWidth}px - 16px)`}
+          width={`calc(100% - ${actionsWidth}px - 8px)`}
           flexShrink={1}
           minWidth={0}
         >
