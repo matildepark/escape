@@ -11,7 +11,7 @@ import { useChatStore, useReplyStore } from '~/logic/state/chat';
 import { FileUploadSource, useFileUpload } from '~/logic/lib/useFileUpload';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import ChatEditor, { CodeMirrorShim, isMobile } from './ChatEditor';
-// import { ChatAvatar } from './ChatAvatar';
+import { ChatAvatar } from './ChatAvatar';
 
 type ChatInputProps = PropsWithChildren<IuseStorage & {
   hideAvatars: boolean;
@@ -165,10 +165,15 @@ export const ChatInput = React.forwardRef(({
         </Box>
       )}
       <Row alignItems='center' position='relative' flexGrow={1} flexShrink={0}>
-        <Row cursor='pointer' p='8px 4px 12px 8px' flexShrink={0} alignItems='center' onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
-          {/* <ChatAvatar contact={ourContact} hideAvatars={hideAvatars} /> */}
-          <Text fontSize="28px" lineHeight="0.75">&#9786;</Text>
-        </Row>
+        {isMobile ? (
+          <Row p='12px 4px 12px 12px' flexShrink={0}>
+            <ChatAvatar contact={ourContact} hideAvatars={hideAvatars} />
+          </Row>
+        ) : (
+          <Row cursor='pointer' p='8px 4px 12px 8px' flexShrink={0} alignItems='center' onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+            <Text fontSize="28px" lineHeight="0.75">&#9786;</Text>
+          </Row>
+        )}
         <ChatEditor
           ref={chatEditor}
           inCodeMode={inCodeMode}

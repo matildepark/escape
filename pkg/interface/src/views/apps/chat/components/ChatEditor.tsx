@@ -311,7 +311,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
         }
       }) : undefined,
       'Enter': () => {
-        if (hasSuggestions) {
+        if (!disableAutocomplete && showAutocomplete && hasSuggestions) {
           selectMember(autocompleteSuggestions[mentionCursor])();
         } else {
           onSubmit();

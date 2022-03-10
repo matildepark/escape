@@ -20,11 +20,13 @@ import {
   ignoreGraph,
   ignoreGroup
 } from '@urbit/api';
+import useSettingsState from '~/logic/state/settings';
 
 interface FormSchema {
   mentions: boolean;
   dnd: boolean;
   watchOnSelf: boolean;
+  pushNotificationDetails: boolean;
   graph: {
     [rid: string]: boolean;
   };
@@ -37,15 +39,20 @@ export function NotificationPreferences() {
   const dnd = useHarkState(state => state.doNotDisturb);
   const graphConfig = useHarkState(state => state.notificationsGraphConfig);
   const groupConfig = useHarkState(s => s.notificationsGroupConfig);
+  const { putEntry, pushNotifications: { pushNotificationDetails } } = useSettingsState.getState();
   const initialValues = {
     mentions: graphConfig.mentions,
-    dnd: dnd,
-    watchOnSelf: graphConfig.watchOnSelf
+    watchOnSelf: graphConfig.watchOnSelf,
+    pushNotificationDetails,
+    dnd
   };
 
   const onSubmit = useCallback(async (values: FormSchema, actions: FormikHelpers<FormSchema>) => {
     try {
       const { poke } = useHarkState.getState();
+      if (values.pushNotificationDetails !== pushNotificationDetails) {
+        putEntry('pushNotifications', 'pushNotificationDetails', values.pushNotificationDetails);
+      }
       if (values.mentions !== graphConfig.mentions) {
         poke(setMentions(values.mentions));
       }
