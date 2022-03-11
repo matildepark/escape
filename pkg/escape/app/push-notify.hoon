@@ -180,17 +180,17 @@
       `state
     ::
     =/  include-details=?
-      ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-bucket/landscape/(scot %tas pushNotifications)/noun)
+      ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-bucket/landscape/(scot %tas 'pushNotifications')/noun)
         %.n
-      ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-entry/landscape/(scot %tas pushNotifications)/(scot %tas pushNotificationDetails)/noun)
+      ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-entry/landscape/(scot %tas 'pushNotifications')/(scot %tas 'pushNotificationDetails')/noun)
         %.n
       =/  include-data=data:settings
-        .^(data:settings %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/entry/landscape/(scot %tas pushNotifications)/(scot %tas pushNotificationDetails)/noun)
-      ?.  ?=(%entry -.include.data)
+        .^(data:settings %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/entry/landscape/(scot %tas 'pushNotifications')/(scot %tas 'pushNotificationDetails')/noun)
+      ?.  ?=(%entry -.include-data)
         %.n
-      ?.  ?=(%b -.val.include.data)
+      ?.  ?=(%b -.val.include-data)
         %.n
-      p.val.include.data
+      p.val.include-data
     ::  send http request
     ::
     =/  =header-list:http
@@ -198,7 +198,7 @@
       ==
     =/  note=notification  +.upd
     =/  title=@t  (contents-to-cord title.body.note)
-    =/  json-list
+    =/  json-list=(list [@t json])
       :~  to+s+p.val.data
           title+s+title
           :-  %data
@@ -209,7 +209,7 @@
     =.  json-list
       ?:  include-details
         =/  body=@t  (contents-to-cord content.body.note)
-        (weld json-list ~[body+s+body])
+        [body+s+body json-list]
       json-list
     =|  =request:http
     =:  method.request       %'POST'
@@ -226,7 +226,7 @@
   ==
 ::
 ++  contents-to-cord
-  |=  contents=(list contents)
+  |=  contents=(list content:hark-store)
   %+  rap  3
   %+  turn  contents
   |=  [type=?(%ship %text) content=@]
