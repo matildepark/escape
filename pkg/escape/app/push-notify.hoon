@@ -166,7 +166,7 @@
   ?+    -.upd  `state
   ::
       %add-note
-    ::  get token from settings-store
+    ::  read from settings-store
     ::
     ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-bucket/landscape/escape-app/noun)
       `state
@@ -178,6 +178,19 @@
       `state
     ?.  ?=(%s -.val.data)
       `state
+    ::
+    =/  include-details=?
+      ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-bucket/landscape/(scot %tas pushNotifications)/noun)
+        %.n
+      ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-entry/landscape/(scot %tas pushNotifications)/(scot %tas pushNotificationDetails)/noun)
+        %.n
+      =/  include-data=data:settings
+        .^(data:settings %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/entry/landscape/(scot %tas pushNotifications)/(scot %tas pushNotificationDetails)/noun)
+      ?.  ?=(%entry -.include.data)
+        %.n
+      ?.  ?=(%b -.val.include.data)
+        %.n
+      p.val.include.data
     ::  send http request
     ::
     =/  =header-list:http
@@ -185,6 +198,19 @@
       ==
     =/  note=notification  +.upd
     =/  title=@t  (contents-to-cord title.body.note)
+    =/  json-list
+      :~  to+s+p.val.data
+          title+s+title
+          :-  %data
+          %-  pairs:enjs:format
+          :~  redirect+s+(get-notification-redirect link.body.note)
+              ship+s+(scot %p our.bowl)
+      ==  ==
+    =.  json-list
+      ?:  include-details
+        =/  body=@t  (contents-to-cord content.body.note)
+        (weld json-list ~[body+s+body])
+      json-list
     =|  =request:http
     =:  method.request       %'POST'
         url.request          'https://exp.host/--/api/v2/push/send'
@@ -194,13 +220,7 @@
       %-  as-octt:mimes:html
       %-  en-json:html
       %-  pairs:enjs:format
-      :~  to+s+p.val.data
-          title+s+title
-          :-  %data
-          %-  pairs:enjs:format
-          :~  redirect+s+(get-notification-redirect link.body.note)
-              ship+s+(scot %p our.bowl)
-      ==  ==
+      json-list
     ==
     [~[[%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]] state]
   ==
