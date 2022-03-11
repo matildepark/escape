@@ -1,11 +1,5 @@
-import {
-  Box,
-  Col,
-  H3,
-  Icon, Row,
-  Text
-} from '@tlon/indigo-react';
-import React from 'react';
+import { Box, Button, Col, H3, Icon, Row, Text } from '@tlon/indigo-react';
+import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
@@ -15,6 +9,7 @@ import useMetadataState from '~/logic/state/metadata';
 import { Workspace } from '~/types/workspace';
 import { Dropdown } from '~/views/components/Dropdown';
 import { MetadataIcon } from './MetadataIcon';
+import { GroupOrder } from './Sidebar/SidebarGroupSorter';
 import { TitleActions } from './Sidebar/TitleActions';
 import { SidebarListConfig } from './Sidebar/types';
 
@@ -74,17 +69,21 @@ return (
 }
 
 export function GroupSwitcher(props: {
-workspace: Workspace;
-baseUrl: string;
-recentGroups: string[];
-isAdmin: any;
-changingSort: boolean;
-toggleChangingSort: () => void;
+  workspace: Workspace;
+  baseUrl: string;
+  recentGroups: string[];
+  isAdmin: any;
+  changingSort: boolean;
+  groupOrder: GroupOrder;
+  saveGroupOrder: (groupOrder: GroupOrder) => void;
+  toggleChangingSort: () => void;
 }) {
-const { workspace, isAdmin, changingSort, toggleChangingSort } = props;
+const { workspace, isAdmin, changingSort, toggleChangingSort, groupOrder, saveGroupOrder } = props;
 const associations = useMetadataState(state => state.associations);
 const title = getTitleFromWorkspace(associations, workspace);
 const groupPath = getGroupFromWorkspace(workspace);
+const [folder, setFolder] = useState('');
+const [folderCreated, setFolderCreated] = useState(false);
 const metadata = (workspace.type === 'home' || workspace.type  === 'uqbar-home' || workspace.type  === 'messages')
   ? undefined
   : associations.groups[workspace.group].metadata;
@@ -98,11 +97,23 @@ const [config, setConfig] = useLocalStorageState<SidebarListConfig>(
 );
 const showTitleActions = (props.workspace?.type === 'messages' || props.workspace?.type === 'home' || props.workspace?.type === 'uqbar-home');
 
+const addGroupFolder = useCallback(() => {
+  if (folder && !groupOrder.find(go => go && typeof go !== 'string' && go?.folder === folder)) {
+    const newOrder = Array.from(groupOrder);
+    newOrder.unshift({ folder, groups: [] });
+    saveGroupOrder(newOrder);
+    setFolder('');
+    setFolderCreated(true);
+    setTimeout(() => setFolderCreated(false), 2000);
+  }
+}, [folder, setFolder, groupOrder, saveGroupOrder]);
+
 if (changingSort) {
   return (
     <Row
       width="100%"
       alignItems="center"
+      justifyContent="space-between"
       flexShrink={0}
       height='48px'
       backgroundColor="white"
@@ -112,11 +123,43 @@ if (changingSort) {
       borderBottom='1px solid'
       borderRight="1px solid"
       borderColor='lightGray'
-      cursor='pointer'
-      onClick={toggleChangingSort}
     >
-      <Icon icon="ArrowWest" size="20px" ml="-8px" mr={2} />
-      <H3>Order Groups</H3>
+      <Row alignItems="center" cursor='pointer' onClick={toggleChangingSort}>
+        <Icon icon="ArrowWest" size="20px" ml="-8px" mr={2} />
+        <H3>Order Groups</H3>
+      </Row>
+      <Dropdown
+        dropWidth='192px'
+        width='auto'
+        alignY='top'
+        alignX='right'
+        flexShrink={0}
+        offsetY={-30}
+        options={
+          <Col
+            p={3}
+            backgroundColor='white'
+            color='washedGray'
+            border={1}
+            borderRadius={2}
+            borderColor='lightGray'
+            boxShadow='0px 0px 0px 3px'
+          >
+            <input placeholder='Folder name' onChange={e => setFolder(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  addGroupFolder();
+                }
+              }}
+              value={folder} style={{ padding: '6px', marginBottom: '8px', border: '1px solid lightGray', borderRadius:'4px' }}
+            />
+            <Button onClick={addGroupFolder}>Add Folder</Button>
+            {folderCreated && <Text mt={2}>Folder added!</Text>}
+          </Col>
+        }
+      >
+        <Button p={2} mr={3}><Icon icon="Plus" /></Button>
+      </Dropdown>
     </Row>
   );
 }

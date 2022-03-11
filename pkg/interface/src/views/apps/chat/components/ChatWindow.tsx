@@ -40,6 +40,7 @@ interface ChatWindowState {
   initialized: boolean;
   unreadIndex: BigInteger;
   isAtEnd: boolean;
+  scrolledToTarget: boolean;
 }
 
 interface RendererProps {
@@ -67,7 +68,8 @@ class ChatWindow extends Component<
       idle: true,
       initialized: true,
       unreadIndex: bigInt.zero,
-      isAtEnd: true
+      isAtEnd: true,
+      scrolledToTarget: false
     };
 
     this.scrollToUnread = this.scrollToUnread.bind(this);
@@ -81,9 +83,10 @@ class ChatWindow extends Component<
 
   componentDidMount() {
     const unreadIndex = this.calculateUnreadIndex();
-    if (this.props.scrollTo) {
+    if (this.props.scrollTo && this.props.graph.get(bigInt(this.props.scrollTo))) {
       this.virtualList!.scrollLocked = false;
       this.virtualList!.scrollToIndex(this.props.scrollTo);
+      this.setState({ scrolledToTarget: true });
     } else if (unreadIndex && !this.dismissedInitialUnread()) {
       this.virtualList!.scrollLocked = false;
       this.virtualList!.scrollToIndex(unreadIndex);
@@ -142,16 +145,21 @@ class ChatWindow extends Component<
 
   componentDidUpdate(prevProps: ChatWindowProps): void {
     const { unreadCount, graphSize, station } = this.props;
-    if(unreadCount === 0 && prevProps.unreadCount !== unreadCount) {
+    if (unreadCount === 0 && prevProps.unreadCount !== unreadCount) {
       this.unreadSet = true;
     }
 
-    if(this.prevSize !== graphSize) {
+    if (!this.state.scrolledToTarget && this.props.graph.get(bigInt(this.props.scrollTo))) {
+      this.virtualList!.scrollToIndex(this.props.scrollTo);
+      this.setState({ scrolledToTarget: true });
+    }
+
+    if (this.prevSize !== graphSize) {
       this.prevSize = graphSize;
-      if(this.state.unreadIndex.eq(bigInt.zero)) {
+      if (this.state.unreadIndex.eq(bigInt.zero)) {
         this.calculateUnreadIndex();
       }
-      if(this.unreadSet &&
+      if (this.unreadSet &&
         this.dismissedInitialUnread() &&
         this.virtualList!.startOffset() < 5 &&
         document.hasFocus()) {
@@ -197,8 +205,6 @@ class ChatWindow extends Component<
 
     this.virtualList?.scrollToIndex(this.state.unreadIndex);
   }
-
-  scrollToEnd = () => this.virtualList?.resetScroll();
 
   onScroll = (event: SyntheticEvent<HTMLDListElement, Event>) => {
     const scrollTop = (event.target as any).scrollTop;
@@ -300,7 +306,7 @@ class ChatWindow extends Component<
          />)}
         {!this.state.isAtEnd && (
           <Box position="absolute" bottom="12px" right="12px" zIndex={1}>
-            <Button onClick={this.scrollToEnd} cursor='pointer'>
+            <Button onClick={() => this.virtualList?.resetScroll()} cursor='pointer'>
               <Icon icon="ChevronSouth" />
             </Button>
           </Box>

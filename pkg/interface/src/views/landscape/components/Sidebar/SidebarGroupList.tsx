@@ -1,20 +1,19 @@
 import React, { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { resourceAsPath } from '@urbit/api';
-import _, { find } from 'lodash';
+import _ from 'lodash';
 import { DragDropContext } from 'react-beautiful-dnd';
 
 import { SidebarItemBase } from './SidebarItem';
 import { SidebarListConfig } from './types';
 import useMetadataState, { usePreview } from '~/logic/state/metadata';
 import { useHistory } from 'react-router';
-import useSettingsState from '~/logic/state/settings';
 import useGroupState from '~/logic/state/group';
 import useInviteState from '~/logic/state/invite';
 import { sortGroupsAlph } from '~/views/apps/launch/components/Groups';
 import { Box, LoadingSpinner } from '@tlon/indigo-react';
 import { useQuery } from '~/logic/lib/useQuery';
-import { GroupOrder, SidebarGroupSorter } from './SidebarGroupSorter';
-import { SidebarGroup } from './SidebarGroup';
+import { GroupOrder, MoveFolderArgs, SidebarGroupSorter } from './SidebarGroupSorter';
+import { SidebarFolder, SidebarGroup } from './SidebarGroup';
 
 interface PendingSidebarGroupProps {
   path: string;
@@ -52,6 +51,8 @@ function PendingSidebarGroup({ path }: PendingSidebarGroupProps) {
 export function SidebarGroupList({
   messages = false,
   changingSort = false,
+  groupOrder,
+  saveGroupOrder,
   ...props
 }: {
   config: SidebarListConfig;
@@ -59,43 +60,97 @@ export function SidebarGroupList({
   changingSort?: boolean;
   selected?: string;
   messages?: boolean;
+  groupOrder: GroupOrder;
+  saveGroupOrder: (groupOrder: GroupOrder) => void;
 }): ReactElement {
   const { associations } = useMetadataState();
   const { groups } = useGroupState();
-  const { groupSorter, putEntry } = useSettingsState.getState();
-  const [groupOrder, setGroupOrder] = useState<GroupOrder>(JSON.parse(groupSorter.order || '[]'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 8000);
   }, []);
 
-  const saveGroupOrder = useCallback((newOrder) => {
-    putEntry('groupSorter', 'order', JSON.stringify(newOrder));
-    setGroupOrder(newOrder);
-  }, [putEntry, setGroupOrder]);
-
   const handleDragAndDrop = useCallback(({ source, destination }) => {
-    if (!destination) {
+    if (!destination)
       return;
-    }
-    // TODO: figure out how to drag onto folders
+
     const items = Array.from(groupOrder);
     const [reorderedItem] = items.splice(source.index, 1);
     items.splice(destination.index, 0, reorderedItem);
     saveGroupOrder(items);
   }, [groupOrder, saveGroupOrder]);
 
+  const moveToFolder = useCallback(({ orig, dest, group }: MoveFolderArgs) => {
+    if (orig) {
+      const newOrder = groupOrder.map((go) => {
+        if (go && typeof go !== 'string' && go.folder === orig) {
+          return { folder: orig, groups: go.groups.filter(g => g !== group) };
+        } else if (go && typeof go !== 'string' && go.folder === dest) {
+          return { folder: dest, groups: go.groups.concat([group]) };
+        }
+        return go;
+      });
+      if (!dest) {
+        newOrder.unshift(group);
+      }
+      saveGroupOrder(newOrder);
+    } else {
+      const newOrder = groupOrder
+        .map((go) => {
+          if (go && typeof go !== 'string' && go.folder === dest) {
+            return { folder: dest, groups: go.groups.concat([group]) };
+          }
+          return go;
+        })
+        .filter(go => typeof go !== 'string' || go !== group);
+
+      saveGroupOrder(newOrder);
+    }
+  }, [groupOrder, saveGroupOrder]);
+
+  const reorderGroup = useCallback((folder: string, group: string, index: number, direction: 'up' | 'down') => {
+    const newOrder = groupOrder.map((go) => {
+      if (go && typeof go !== 'string' && go.folder === folder) {
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+        const groups = Array.from(go.groups);
+        const [reorderedGroup] = groups.splice(index, 1);
+        groups.splice(newIndex, 0, reorderedGroup);
+        return { folder, groups };
+      }
+      return go;
+    });
+    saveGroupOrder(newOrder);
+  }, [groupOrder, saveGroupOrder]);
+
+  const deleteFolder = useCallback((folder: string) => {
+    if (confirm('Are you sure you want to delete this folder? The groups will be moved to the bottom of the main list.')) {
+      let groups: string[] = [];
+      const newOrder = groupOrder.filter((go) => {
+        if (go && typeof go !== 'string' && go.folder === folder) {
+          groups = go.groups;
+          return false;
+        }
+        return true;
+      });
+      newOrder.concat(groups);
+      saveGroupOrder(newOrder);
+    }
+  }, [groupOrder, saveGroupOrder]);
+
+  const toggleCollapse = useCallback((folder: string) => () => {
+    const newOrder = groupOrder.map((go) => {
+      if (go && typeof go !== 'string' && go.folder === folder) {
+        go.collapsed = !go.collapsed;
+      }
+      return go;
+    });
+    saveGroupOrder(newOrder);
+  }, [groupOrder, saveGroupOrder]);
+
   const groupList = useMemo(() => Object.values(associations?.groups || {})
     .filter(e => e?.group in groups)
     .sort(sortGroupsAlph), [associations, groups]);
-
-  useEffect(() => {
-    const newGroupOrder = JSON.parse(groupSorter.order || '[]');
-    if (newGroupOrder.length) {
-      setGroupOrder(newGroupOrder);
-    }
-  }, [groupSorter]);
 
   useEffect(() => {
     if (!groupOrder.length) {
@@ -139,7 +194,7 @@ export function SidebarGroupList({
   if (changingSort) {
     const groupsToSort = groupOrder.length ? groupOrder : groupList.map(g => g.group);
     return <DragDropContext onDragEnd={handleDragAndDrop}>
-      <SidebarGroupSorter groupOrder={groupsToSort} />
+      <SidebarGroupSorter {...{ groupOrder: groupsToSort, moveToFolder, reorderGroup, deleteFolder }} />
     </DragDropContext>;
   }
 
@@ -149,18 +204,12 @@ export function SidebarGroupList({
       {groupOrder.length ? groupOrder.map((go) => {
         if (typeof go === 'string') {
           const g = associations.groups[go];
-          if (!g) {
+          if (!g)
             return null;
-          }
 
-          return (
-            <SidebarGroup
-              key={g.group}
-              {...props}
-              workspace={{ type: 'group', group: g.group }}
-              title={g.metadata.title}
-            />
-          );
+          return <SidebarGroup key={g.group} {...props} workspace={{ type: 'group', group: g.group }} title={g.metadata.title} />;
+        } else if (go?.folder) {
+          return <SidebarFolder toggleCollapse={toggleCollapse(go.folder)} {...props} folder={go} />;
         }
 
         // TODO: handle folders in groupOrder

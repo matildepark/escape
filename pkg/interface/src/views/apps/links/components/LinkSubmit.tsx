@@ -1,12 +1,12 @@
-import { BaseInput, Box, Button, LoadingSpinner } from '@tlon/indigo-react';
-import { hasProvider } from 'oembed-parser';
 import React, { useState, useEffect } from 'react';
+import { hasProvider } from 'oembed-parser';
+import { createPost } from '@urbit/api';
+import { BaseInput, Box, Button, LoadingSpinner, Text } from '@tlon/indigo-react';
 import { parsePermalink, permalinkToReference } from '~/logic/lib/permalinks';
+import useGraphState from '~/logic/state/graph';
+import { useFileUpload } from '~/logic/lib/useFileUpload';
 import { StatelessUrlInput } from '~/views/components/StatelessUrlInput';
 import SubmitDragger from '~/views/components/SubmitDragger';
-import useGraphState from '~/logic/state/graph';
-import { createPost } from '@urbit/api';
-import { useFileUpload } from '~/logic/lib/useFileUpload';
 
 interface LinkSubmitProps {
   name: string;
@@ -45,11 +45,7 @@ const LinkSubmit = (props: LinkSubmitProps) => {
     const parentIndex = props.parentIndex || '';
     const post = createPost(window.ship, contents, parentIndex);
 
-    addPost(
-      `~${props.ship}`,
-      props.name,
-      post
-    );
+    addPost(`~${props.ship}`, props.name, post);
     setDisabled(false);
     setLinkValue('');
     setLinkTitle('');
@@ -70,9 +66,9 @@ const LinkSubmit = (props: LinkSubmitProps) => {
         setLinkValue(link);
       }
     }
-    if(link.startsWith('web+urbitgraph://')) {
+    if (link.startsWith('web+urbitgraph://')) {
       const permalink = parsePermalink(link);
-      if(!permalink) {
+      if (!permalink) {
         setLinkValid(false);
         return;
       }
@@ -98,6 +94,9 @@ const LinkSubmit = (props: LinkSubmitProps) => {
           .replace(/\d{4}\.\d{1,2}\.\d{2}\.\.\d{2}\.\d{2}\.\d{2}-/, '')
         ));
       }
+    } else {
+      setLinkValid(false);
+        return;
     }
     return link;
   };
@@ -123,6 +122,7 @@ const LinkSubmit = (props: LinkSubmitProps) => {
   return (
     <>
     {/* @ts-ignore archaic event type mismatch */}
+      <Text mb={1}>Urbit links should start with {'"web+urbitgraph://"'}</Text>
       <Box
         flexShrink={0}
         position='relative'
@@ -146,17 +146,17 @@ const LinkSubmit = (props: LinkSubmitProps) => {
                       >
           <LoadingSpinner />
         </Box>}
-      {drag.dragging && <SubmitDragger />}
-      <StatelessUrlInput
-        value={linkValue}
-        promptUpload={promptUpload}
-        canUpload={canUpload}
-        onSubmit={doPost}
-        onChange={setLinkValue}
-        error={linkValid ? 'Invalid URL' : undefined}
-        onKeyPress={onKeyPress}
-        onPaste={onPaste}
-      />
+        {drag.dragging && <SubmitDragger />}
+        <StatelessUrlInput
+          value={linkValue}
+          promptUpload={promptUpload}
+          canUpload={canUpload}
+          onSubmit={doPost}
+          onChange={setLinkValue}
+          error={linkValid ? 'Invalid URL' : undefined}
+          onKeyPress={onKeyPress}
+          onPaste={onPaste}
+        />
         <BaseInput
           type="text"
           pl={2}

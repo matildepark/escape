@@ -2,18 +2,20 @@ import {
   Box,
     Col
 } from '@tlon/indigo-react';
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { roleForShip } from '~/logic/lib/group';
 import { IS_MOBILE, IS_SHORT_SCREEN } from '~/logic/lib/platform';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 import { getGroupFromWorkspace } from '~/logic/lib/workspace';
 import useGroupState from '~/logic/state/group';
+import useSettingsState from '~/logic/state/settings';
 import { Workspace } from '~/types';
 import { getNavbarHeight } from '~/views/components/navigation/MobileNavbar';
 import { GroupSwitcher } from '../GroupSwitcher';
 import { SidebarGroupList } from './SidebarGroupList';
 import { SidebarListConfig } from './types';
+import { GroupOrder } from './SidebarGroupSorter';
 
 export const HEADER_HEIGHT = 48;
 
@@ -36,6 +38,21 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
   const { baseUrl, selected, workspace, recentGroups } = props;
   const groupPath = getGroupFromWorkspace(workspace);
   const [changingSort, setChangingSort] = useState(false);
+  const { groupSorter, putEntry } = useSettingsState.getState();
+  const [groupOrder, setGroupOrder] = useState<GroupOrder>(JSON.parse(groupSorter.order || '[]'));
+
+  const saveGroupOrder = useCallback((newOrder) => {
+    const validOrder = newOrder.filter(o => o);
+    putEntry('groupSorter', 'order', JSON.stringify(validOrder));
+    setGroupOrder(validOrder);
+  }, [putEntry, setGroupOrder]);
+
+  useEffect(() => {
+    const newGroupOrder = JSON.parse(groupSorter.order || '[]');
+    if (newGroupOrder.length) {
+      setGroupOrder(newGroupOrder);
+    }
+  }, [groupSorter.order]);
 
   const [config] = useLocalStorageState<SidebarListConfig>(
     `group-config:${groupPath || 'home'}`,
@@ -61,7 +78,11 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
   } else if (focusMessages) {
     groupsHeight = `calc(50% - ${HEADER_HEIGHT / 2}px)`;
     messagesHeight = `calc(50% - ${HEADER_HEIGHT / 2}px)`;
+  } else if (changingSort) {
+    groupsHeight = `calc(100% - ${HEADER_HEIGHT}px)`;
   }
+
+  const groupListProps = { config, selected, baseUrl, changingSort, groupOrder, saveGroupOrder };
 
   return (
     <Box>
@@ -72,6 +93,8 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
         workspace={workspace}
         changingSort={changingSort}
         toggleChangingSort={() => setChangingSort(!changingSort)}
+        groupOrder={groupOrder}
+        saveGroupOrder={saveGroupOrder}
       />
       {(!isSmallScreen || !focusMessages) && (
         <ScrollbarLessCol
@@ -91,10 +114,10 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
           pb={1}
         >
           <Box mt={2} />
-          <SidebarGroupList {...{ config, selected, baseUrl, changingSort }} />
+          <SidebarGroupList {...groupListProps} changingSort={changingSort} />
         </ScrollbarLessCol>
       )}
-      {(!isSmallScreen || focusMessages) && (
+      {(!changingSort && !isSmallScreen || focusMessages) && (
         <ScrollbarLessCol
           display="flex"
           width="100%"
@@ -108,7 +131,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
           position={IS_MOBILE ? 'absolute' : 'relative'}
           height={messagesHeight}
         >
-          <SidebarGroupList {...{ config, selected, baseUrl }} messages />
+          <SidebarGroupList {...groupListProps} messages />
         </ScrollbarLessCol>
       )}
     </Box>

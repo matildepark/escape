@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren, ReactNode, useCallback, useState, useImperativeHandle, MouseEvent } from 'react';
+import React, { FC, PropsWithChildren, ReactNode, useCallback, useState, useImperativeHandle, MouseEvent, useMemo } from 'react';
 import Picker from 'emoji-picker-react';
 import { Box, Col, Icon, LoadingSpinner, Row, Text } from '@tlon/indigo-react';
 import { Association, Contact, Content, evalCord, Group } from '@urbit/api';
@@ -10,8 +10,11 @@ import airlock from '~/logic/api';
 import { useChatStore, useReplyStore } from '~/logic/state/chat';
 import { FileUploadSource, useFileUpload } from '~/logic/lib/useFileUpload';
 import { IS_MOBILE } from '~/logic/lib/platform';
+import { useDark } from '~/logic/state/join';
 import ChatEditor, { CodeMirrorShim, isMobile } from './ChatEditor';
 import { ChatAvatar } from './ChatAvatar';
+import './ChatInput.scss';
+import { parseEmojis } from '~/views/landscape/components/Graph/parse';
 
 type ChatInputProps = PropsWithChildren<IuseStorage & {
   hideAvatars: boolean;
@@ -88,6 +91,7 @@ export const ChatInput = React.forwardRef(({
   const [inCodeMode, setInCodeMode] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
+  const dark = useDark();
   const { message, setMessage } = useChatStore();
   const { reply, setReply } = useReplyStore();
   const { canUpload, uploading, promptUpload, onPaste } = useFileUpload({
@@ -107,7 +111,7 @@ export const ChatInput = React.forwardRef(({
   }
 
   const submit = useCallback(async () => {
-    const text = `${reply.link}${chatEditor.current?.getValue() || ''}`;
+    const text = `${reply.link}${parseEmojis(chatEditor.current?.getValue() || '')}`;
 
     if (text === '')
       return;
@@ -127,18 +131,19 @@ export const ChatInput = React.forwardRef(({
 
   const onEmojiClick = (event, emojiObject) => {
     if (isMobile) {
-      const cursor = chatEditor?.current.getCursor();
-      const value = chatEditor?.current.getValue();
+      const cursor = chatEditor?.current?.getCursor();
+      const value = chatEditor?.current?.getValue();
       const newValue = `${value.slice(0, cursor)}${emojiObject.emoji}${value.slice(cursor)}`;
-      chatEditor?.current.setValue(newValue);
+      chatEditor?.current?.setValue(newValue);
       setMessage(newValue);
     } else {
-      const doc = chatEditor?.current.getDoc();
+      const doc = chatEditor?.current?.getDoc();
       const cursor = doc.getCursor();
       doc.replaceRange(emojiObject.emoji, cursor);
     }
 
     setShowEmojiPicker(false);
+    chatEditor?.current?.focus();
   };
 
   const closeEmojiPicker = (e: MouseEvent) => {
@@ -149,6 +154,13 @@ export const ChatInput = React.forwardRef(({
 
   const isReply = Boolean(reply.link);
   const [, patp] = reply.link.split('\n');
+
+  const emojiPickerStyle = useMemo(() => ({
+    background: dark ? 'rgb(26,26,26)' : 'white',
+    color: dark ? 'white' : 'rgb(26,26,26)',
+    boxShadow: '0 0 3px #efefef',
+    borderColor: dark ? 'black' : 'white'
+  }), [dark]);
 
   return (
     <InputBox isReply={isReply}>
@@ -161,7 +173,7 @@ export const ChatInput = React.forwardRef(({
       {showEmojiPicker && (
         <Box position="absolute" bottom="42px" backgroundColor="white" borderRadius={4}>
           <Box position="fixed" top="0" bottom="0" left="0" right="0" background="transparent" onClick={closeEmojiPicker} />
-          <Picker onEmojiClick={onEmojiClick} />
+          <Picker onEmojiClick={onEmojiClick} pickerStyle={emojiPickerStyle} />
         </Box>
       )}
       <Row alignItems='center' position='relative' flexGrow={1} flexShrink={0}>

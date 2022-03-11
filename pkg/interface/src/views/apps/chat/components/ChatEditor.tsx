@@ -17,6 +17,7 @@ import { useDark } from '~/logic/state/join';
 import { useChatStore, useReplyStore } from '~/logic/state/chat';
 import { AutocompletePatp } from './AutocompletePatp';
 import '../css/custom.css';
+import { EMOJI_REGEX, parseEmojis } from '~/views/landscape/components/Graph/parse';
 
 export const SIG_REGEX = /(?:^|\s)(~)(?=\s|$)/;
 export const MENTION_REGEX = /(?:^|\s)(~)(?![a-z]{6}\-[a-z]{6}[?=\s|$])(?![a-z]{6}[?=\s|$])([a-z\-]+)(?=\s|$)/;
@@ -254,7 +255,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     if (value == message || value == '' || value == ' ')
       return;
 
-    setMessage(value);
+    setMessage(parseEmojis(value));
 
     if (!group || memberArray.length > 500 || !value.includes('~'))
       return;

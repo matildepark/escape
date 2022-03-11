@@ -20,11 +20,16 @@ export default function InfoScreen(props: any): ReactElement {
           <H2>EScape Info</H2>
           <H3 mt={4}>What&apos;s in v{version}</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
-          <Text mt={1}>None</Text>
+          <Text mt={1}>- Create Folders for groups and sort</Text>
+          <Text mt={1}>- Replace :emoji: with the html emoji inline in the text box. Note: desktop text editor doesn’t handle this well and you have to navigate away and then back to see it.</Text>
+          <Text mt={1}>- Option to send body in push notification in Settings {'>'} Notifications</Text>
+          <Text mt={1}>- Put links/notes and author in same component visually</Text>
+          <Text mt={1}></Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
-          <Text mt={1}>- Hitting “Enter” after autocompleting a mention sends the message (desktop)</Text>
-          <Text mt={1}>- Remove emoji picker on mobile</Text>
-          <Text mt={1}>- In notebooks (mobile) the new posts button overlaps with the notebook/channel name</Text>
+          <Text mt={1}>- Dark mode emoji picker</Text>
+          <Text mt={1}>- Going to a chat message link that is more than 200(?) messages ago now routes correctly</Text>
+          <Text mt={1}>- Focus textbox after emoji selection</Text>
+          <Text mt={1}>- Check new links for valid URL format</Text>
           <Text mt={1}></Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>

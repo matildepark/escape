@@ -36,7 +36,7 @@ function useAssociationStatus(resource: string) {
 
 export function SidebarItemBase(props: {
   to: string;
-  selected: boolean;
+  selected?: boolean;
   groupSelected?: boolean;
   hasNotification: boolean;
   hasUnread: boolean;
@@ -48,6 +48,7 @@ export function SidebarItemBase(props: {
   fontSize?: string;
   pending?: boolean;
   isGroup?: boolean;
+  isFolder?: boolean;
   locked?: boolean;
   isAdmin?: boolean;
   open?: boolean;
@@ -58,7 +59,7 @@ export function SidebarItemBase(props: {
     title,
     children = null,
     to,
-    selected,
+    selected = false,
     groupSelected = false,
     fontSize,
     hasNotification,
@@ -68,6 +69,7 @@ export function SidebarItemBase(props: {
     mono = false,
     pending = false,
     isGroup = false,
+    isFolder = false,
     locked = false,
     isAdmin = false,
     open = false,
@@ -81,8 +83,8 @@ export function SidebarItemBase(props: {
       : 'gray'
     : 'lightGray';
 
-  const hasGroupUnread = isGroup && (hasUnread || hasNotification);
-  const hasChannelUnread = !isGroup && (hasUnread || hasNotification);
+  const hasGroupUnread = (isGroup || isFolder) && (hasUnread || hasNotification);
+  const hasChannelUnread = !isGroup && !isFolder && (hasUnread || hasNotification);
 
   const fontStyle = hasGroupUnread ? 'italic' : 'normal';
   const fontWeight = hasChannelUnread ? 600 : 'normal';
@@ -100,7 +102,7 @@ export function SidebarItemBase(props: {
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      position={open ? 'sticky' : 'relative'}
+      position={open && !isFolder ? 'sticky' : 'relative'}
       top={open ? '0px' : undefined}
       zIndex="1"
       backgroundColor="white"

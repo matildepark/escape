@@ -1,5 +1,5 @@
 import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
-import { Associations } from '@urbit/api';
+import { Associations, Timebox } from '@urbit/api';
 import _ from 'lodash';
 
 import { SidebarAssociationItem, SidebarDmItem, SidebarItemBase, SidebarPendingItem } from './SidebarItem';
@@ -18,6 +18,19 @@ import { Box, Icon } from '@tlon/indigo-react';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import { dmUnreads, getItems, sidebarSort } from './util';
 import { roleForShip } from '~/logic/lib/group';
+import { GroupFolder } from './SidebarGroupSorter';
+
+const getHasNotification = (associations: Associations, group: string, unseen: Timebox) => {
+  let hasNotification = false;
+  for (const key in unseen) {
+    const formattedKey = key.replace('landscape/graph', '/ship').replace('/mention', '');
+    if (associations.graph[formattedKey]?.group === group) {
+      hasNotification = true;
+      break;
+    }
+  }
+  return hasNotification;
+};
 
 export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
   config: SidebarListConfig;
@@ -95,20 +108,10 @@ export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
     e.preventDefault();
   }, [cycleChannels]));
 
-  let hasNotification = false;
-  if (workspace.type === 'group') {
-    for (const key in unseen) {
-      const formattedKey = key.replace('landscape/graph', '/ship').replace('/mention', '');
-      if (associations.graph[formattedKey]?.group === workspace?.group) {
-        hasNotification = true;
-        break;
-      }
-    }
-  }
+  const hasNotification = workspace.type === 'group' && getHasNotification(associations, workspace.group, unseen);
   const graphUnreads = getGraphUnreads(associations || ({} as Associations));
   const groupPath = isGroup ? workspace.group : '';
   const unreadCount = isGroup ? graphUnreads(groupPath) : dmUnreads(unreads);
-  const hasUnread = unreadCount > 0;
   const isSynced = true;
   const isPending = false;
   const to = `/~landscape${isGroup ? workspace?.group : isMessages ? '/messages' : '/home'}`;
@@ -124,7 +127,7 @@ export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
       {!isMobileMessages && <SidebarItemBase
         to={to}
         selected={groupSelected}
-        hasUnread={hasUnread}
+        hasUnread={unreadCount > 0}
         unreadCount={unreadCount}
         isSynced={isSynced}
         title={groupTitle}
@@ -209,3 +212,67 @@ export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
     </Box>
   );
 }
+
+interface SidebarFolderProps {
+  config: SidebarListConfig;
+  baseUrl: string;
+  folder: GroupFolder;
+  toggleCollapse: () => void;
+}
+
+export const SidebarFolder = ({
+  folder,
+  toggleCollapse,
+  ...props
+}: SidebarFolderProps) => {
+  const { associations } = useMetadataState();
+  const graphUnreads = getGraphUnreads(associations || ({} as Associations));
+  const { unseen } = useHarkState();
+  const collapsed = Boolean(folder.collapsed);
+
+  const { unreadCount, hasNotification } = folder.groups.reduce((acc, group) => {
+    return {
+      unreadCount: acc.unreadCount + graphUnreads(group),
+      hasNotification: acc.hasNotification || getHasNotification(associations, group, unseen)
+    };
+  }, { unreadCount: 0, hasNotification: false });
+
+  return (
+    <Box position="relative">
+      <SidebarItemBase
+        to={''}
+        title={folder.folder}
+        hasUnread={unreadCount > 0}
+        unreadCount={unreadCount}
+        hasNotification={hasNotification}
+        onClick={toggleCollapse}
+        isFolder
+        isSynced
+        open={!collapsed}
+      >
+        <Icon
+          p={1}
+          pr="0"
+          display="block"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleCollapse();
+          }}
+          icon={collapsed ? 'TriangleEast' : 'TriangleSouth'}
+        />
+      </SidebarItemBase>
+      {!collapsed && (
+        <Box position="relative" style={{ zIndex: 0 }} pl="20px">
+          {folder.groups.map((group) => {
+            const g = associations.groups[group];
+            if (!g)
+              return null;
+
+            return <SidebarGroup key={g.group} {...props} workspace={{ type: 'group', group: g.group }} title={g.metadata.title} />;
+          })}
+        </Box>
+      )}
+    </Box>
+  );
+};

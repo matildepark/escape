@@ -110,12 +110,13 @@ export const LinkItem = React.forwardRef((props: LinkItemProps, ref: RefObject<H
   return (
     <Box
       mx="auto"
-      px={3}
       maxWidth="768px"
       ref={ref}
-      width="100%"
+      width="calc(100% - 32px)"
       opacity={node.post.pending ? '0.5' : '1'}
       {...rest}
+      backgroundColor="washedGray" p={2}
+      mb={3} borderRadius={4}
     >
       <Box
         lineHeight="tall"
@@ -129,6 +130,7 @@ export const LinkItem = React.forwardRef((props: LinkItemProps, ref: RefObject<H
         alignItems="flex-start"
         overflow="hidden"
         onClick={markRead}
+        bg="white"
       >
         {contents[0].text ? <Text p={2}>{contents[0].text}</Text> : null}
         { 'reference' in contents[1] ? (
@@ -154,8 +156,8 @@ export const LinkItem = React.forwardRef((props: LinkItemProps, ref: RefObject<H
           </Text>
         </>
       )}
-      </Box>
-      <Row minWidth={0} flexShrink={0} width="100%" justifyContent="space-between" py={3} bg="white">
+    </Box>
+    <Row minWidth={0} flexShrink={0} width="100%" justifyContent="space-between" py={2}>
       <Author
         showImage
         isRelativeTime
@@ -169,12 +171,12 @@ export const LinkItem = React.forwardRef((props: LinkItemProps, ref: RefObject<H
           to={node.post.pending ? '#' : `${baseUrl}/index/${index}`}
           style={{ cursor: node.post.pending ? 'default' : 'pointer' }}
         >
-        <Box display='flex'>
-          <Icon color={commColor} icon='Chat' />
-          <Text color={commColor} ml={1}>{size}</Text>
-        </Box>
-      </Link>
-        </Box>
+          <Box display='flex'>
+            <Icon color={commColor} icon='Chat' />
+            <Text color={commColor} ml={1}>{size}</Text>
+          </Box>
+        </Link>
+      </Box>
 
       <Dropdown
         dropWidth="200px"
@@ -199,7 +201,6 @@ export const LinkItem = React.forwardRef((props: LinkItemProps, ref: RefObject<H
       >
         <Icon ml={2} display="block" icon="Ellipsis" color="gray" />
       </Dropdown>
-
     </Row>
   </Box>);
 });
