@@ -127,7 +127,7 @@ export const ChatInput = React.forwardRef(({
     setMessage('');
     setReply();
     chatEditor.current.focus();
-  }, [reply]);
+  }, [reply, inCodeMode]);
 
   const onEmojiClick = (event, emojiObject) => {
     if (isMobile) {
