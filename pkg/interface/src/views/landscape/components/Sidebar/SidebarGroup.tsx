@@ -1,24 +1,26 @@
 import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
-import { Associations, Timebox } from '@urbit/api';
+import { useHistory } from 'react-router';
 import _ from 'lodash';
+import { FaFolder, FaFolderOpen } from 'react-icons/fa';
+import { Associations, Timebox } from '@urbit/api';
+import { Box, Icon } from '@tlon/indigo-react';
 
-import { SidebarAssociationItem, SidebarDmItem, SidebarItemBase, SidebarPendingItem } from './SidebarItem';
 import useGraphState, { useInbox } from '~/logic/state/graph';
 import useHarkState from '~/logic/state/hark';
 import { getFeedPath, getResourcePath, modulo } from '~/logic/lib/util';
-import { SidebarListConfig } from './types';
-import { Workspace } from '~/types/workspace';
 import useMetadataState from '~/logic/state/metadata';
-import { useHistory } from 'react-router';
 import { useShortcut } from '~/logic/state/settings';
 import useGroupState from '~/logic/state/group';
 import useInviteState from '~/logic/state/invite';
-import { getGraphUnreads } from '~/views/apps/launch/components/Groups';
-import { Box, Icon } from '@tlon/indigo-react';
 import { IS_MOBILE } from '~/logic/lib/platform';
-import { dmUnreads, getItems, sidebarSort } from './util';
 import { roleForShip } from '~/logic/lib/group';
+import { useDark } from '~/logic/state/join';
+import { Workspace } from '~/types/workspace';
+import { getGraphUnreads } from '~/views/apps/launch/components/Groups';
+import { SidebarListConfig } from './types';
+import { dmUnreads, getItems, sidebarSort } from './util';
 import { GroupFolder } from './SidebarGroupSorter';
+import { SidebarAssociationItem, SidebarDmItem, SidebarItemBase, SidebarPendingItem } from './SidebarItem';
 
 const getHasNotification = (associations: Associations, group: string, unseen: Timebox) => {
   let hasNotification = false;
@@ -229,6 +231,13 @@ export const SidebarFolder = ({
   const graphUnreads = getGraphUnreads(associations || ({} as Associations));
   const { unseen } = useHarkState();
   const collapsed = Boolean(folder.collapsed);
+  const dark = useDark();
+  const folderIconStyle = {
+    height: '14px',
+    width: '18px',
+    paddingTop: '3px',
+    color: dark ? 'white' : 'black'
+  };
 
   const { unreadCount, hasNotification } = folder.groups.reduce((acc, group) => {
     return {
@@ -250,17 +259,15 @@ export const SidebarFolder = ({
         isSynced
         open={!collapsed}
       >
-        <Icon
-          p={1}
-          pr="0"
-          display="block"
+        <Box display="block" pl="2px"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             toggleCollapse();
           }}
-          icon={collapsed ? 'TriangleEast' : 'TriangleSouth'}
-        />
+        >
+          {collapsed ? <FaFolder style={folderIconStyle} /> : <FaFolderOpen style={folderIconStyle} />}
+        </Box>
       </SidebarItemBase>
       {!collapsed && (
         <Box position="relative" style={{ zIndex: 0 }} pl="20px">

@@ -1,5 +1,5 @@
 import { Box, Button, Col, H3, Icon, Row, Text } from '@tlon/indigo-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
@@ -78,6 +78,7 @@ export function GroupSwitcher(props: {
   saveGroupOrder: (groupOrder: GroupOrder) => void;
   toggleChangingSort: () => void;
 }) {
+const inputRef = useRef<HTMLElement>();
 const { workspace, isAdmin, changingSort, toggleChangingSort, groupOrder, saveGroupOrder } = props;
 const associations = useMetadataState(state => state.associations);
 const title = getTitleFromWorkspace(associations, workspace);
@@ -145,20 +146,24 @@ if (changingSort) {
             borderColor='lightGray'
             boxShadow='0px 0px 0px 3px'
           >
-            <input placeholder='Folder name' onChange={e => setFolder(e.target.value)}
+            <input placeholder='Folder name'
+              ref={inputRef} onChange={e => setFolder(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   addGroupFolder();
                 }
               }}
-              value={folder} style={{ padding: '6px', marginBottom: '8px', border: '1px solid lightGray', borderRadius:'4px' }}
+              autoFocus value={folder}
+              style={{ padding: '6px', marginBottom: '8px', border: '1px solid lightGray', borderRadius:'4px' }}
             />
             <Button onClick={addGroupFolder}>Add Folder</Button>
             {folderCreated && <Text mt={2}>Folder added!</Text>}
           </Col>
         }
       >
-        <Button p={2} mr={3}><Icon icon="Plus" /></Button>
+        <Button p={2} mr={3} onClick={() => setTimeout(() => inputRef?.current?.focus(), 50)}>
+          <Icon icon="Plus" />
+        </Button>
       </Dropdown>
     </Row>
   );

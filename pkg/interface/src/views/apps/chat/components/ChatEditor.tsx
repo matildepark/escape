@@ -165,6 +165,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
   const [invitedUsers, setInvitedUsers] = useState<string[]>([]);
   const [mentionedUsers, setMentionedUsers] = useState<string[]>([]);
   const [mentionCursor, setMentionCursor] = useState(0);
+  const [lastKeyPress, setLastKeyPress] = useState(new Date().getTime());
   const [disableAutocomplete, setDisableAutocomplete] = useState(false);
   const memberArray = useMemo(() => [...(group?.members || [])], [group]);
   const disableSpellcheck = useSettingsState(s => s.calm.disableSpellcheck);
@@ -247,7 +248,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     setAutocompleteValues(false, [], '');
   }, [setAutocompleteValues, submit]);
 
-  const messageChange = useCallback((editor, data, value) => {
+  const messageChange = (editor, data, value) => {
     if (message !== '' && value == '') {
       setMessage(value);
       setAutocompleteValues(false, [], '');
@@ -255,11 +256,17 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     if (value == message || value == '' || value == ' ')
       return;
 
+    setLastKeyPress(new Date().getTime());
+
+    if (new Date().getTime() - 100 < lastKeyPress) {
+      setMessage(value);
+      return;
+    }
+
     setMessage(parseEmojis(value));
 
     if (!group || memberArray.length > 500 || !value.includes('~'))
       return;
-
     const sigMatch = SIG_REGEX.test(value);
     const mentionMatch = MENTION_REGEX.test(value);
 
@@ -288,7 +295,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
     }
 
     setMentionCursor(0);
-  }, [group, setAutocompleteValues, autocompleteSuggestions]);
+  };
 
   const hasSuggestions = autocompleteSuggestions.length > 0;
 

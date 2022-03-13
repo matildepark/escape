@@ -1,10 +1,12 @@
 import React, { ReactElement, useCallback } from 'react';
 import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaFolder } from 'react-icons/fa';
 
 import { Box, Col, Icon, Row, Text } from '@tlon/indigo-react';
 import useMetadataState from '~/logic/state/metadata';
 import { Dropdown } from '~/views/components/Dropdown';
 import styled from 'styled-components';
+import { useDark } from '~/logic/state/join';
 
 export type GroupFolder = {
   folder: string,
@@ -43,6 +45,7 @@ interface GroupTileProps {
   canReorder?: boolean;
   isFirst?: boolean;
   isLast?: boolean;
+  dropup?: boolean;
   moveToFolder: (args: MoveFolderArgs) => void;
   moveUp?: () => void;
   moveDown?: () => void;
@@ -58,9 +61,11 @@ function GroupTile({
   moveDown = () => null,
   canReorder = false,
   isFirst = false,
-  isLast = false
+  isLast = false,
+  dropup = false
 }: GroupTileProps) {
   const isInFolder = Boolean(folder);
+  const alignY = dropup ? 'bottom' : 'top';
 
   return (
     <Row py={isInFolder ? 1 : 2} px={isInFolder ? 2 : 3}
@@ -81,7 +86,7 @@ function GroupTile({
         <Dropdown
           dropWidth='192px'
           width='auto'
-          alignY='top'
+          alignY={alignY}
           alignX='right'
           flexShrink={0}
           offsetY={-24}
@@ -92,6 +97,8 @@ function GroupTile({
               border={1}
               borderColor="lightGray"
               borderRadius={2}
+              maxHeight="160px"
+              overflowY="scroll"
             >
               <Text>Move to folder:</Text>
               {folder && <FolderRow onClick={() => moveToFolder({ orig: folder, group })}>Remove from {folder}</FolderRow>}
@@ -112,16 +119,16 @@ interface GroupCardProps {
   title: string;
   group: string;
   index: number;
+  length: number;
   folders: string[];
   moveToFolder: (args: MoveFolderArgs) => void;
 }
 
-function GroupCard({ title, group, index, folders, moveToFolder }: GroupCardProps) {
-  // TODO: make this addable to a folder
+function GroupCard({ title, group, index, length, folders, moveToFolder }: GroupCardProps) {
   return (
     <Draggable key={group} draggableId={group} index={index}>
       {provided => <Box ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-        <GroupTile {...{ title, folders, group, moveToFolder }} />
+        <GroupTile {...{ title, folders, group, moveToFolder }} dropup={length - index < 5} />
       </Box>}
     </Draggable>
   );
@@ -131,6 +138,7 @@ interface FolderCardProps {
   title: string;
   group: string;
   index: number;
+  length: number;
   groups: string[];
   folders: string[];
   getTitle: (g: string | GroupFolder) => string;
@@ -143,6 +151,7 @@ function FolderCard({
   title,
   group,
   index,
+  length,
   groups,
   folders,
   getTitle,
@@ -150,6 +159,8 @@ function FolderCard({
   reorderGroup,
   deleteFolder
 }: FolderCardProps) {
+  const dark = useDark();
+
   return (
     <Draggable key={group} draggableId={group} index={index}>
       {provided => (
@@ -163,8 +174,11 @@ function FolderCard({
           whiteSpace="nowrap"
           textOverflow="ellipsis"
         >
-          <Row alignItems="center" justifyContent="space-between">
-            <Text fontWeight="600">{title}</Text>
+          <Row alignItems="center" justifyContent="space-between" ml={-1}>
+            <Row alignItems="center">
+              <FaFolder style={{ height: '14px', width: '18px', paddingRight: '4px', color: dark ? 'white' : 'black' }} />
+              <Text fontWeight="600">{title}</Text>
+            </Row>
             <Dropdown
               dropWidth='192px'
               width='auto'
@@ -197,6 +211,7 @@ function FolderCard({
                 moveUp={() => reorderGroup(title, g, i, 'up')}
                 moveDown={() => reorderGroup(title, g, i, 'down')}
                 moveToFolder={moveToFolder}
+                dropup={(length - index) + (groups.length - i) < 6}
               />
             ))}
           </Box>
@@ -221,21 +236,26 @@ export function SidebarGroupSorter({
 }: SidebarGroupSorterProps): ReactElement {
   const { associations } = useMetadataState();
 
-  const getTitle = useCallback((g: string | GroupFolder) => typeof g === 'string' ? associations.groups[g]?.metadata?.title : g?.folder, [associations]);
+  const getTitle = useCallback((g: string | GroupFolder) => {
+    if (g === 'My Channels')
+      return g;
+
+    return typeof g === 'string' ? associations.groups[g]?.metadata?.title : g?.folder;
+  }, [associations]);
   const folders = groupOrder.filter(entry => entry && typeof entry !== 'string').map(({ folder }: any) => folder);
 
   return (
     <Droppable droppableId="groups" style={{ width: '100%' }}>
       {provided => (
         <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mt="-8px" mb="-4px">
-          {groupOrder.map((entry, index) => {
+          {groupOrder.map((entry, index, { length }) => {
             const title = getTitle(entry);
             if (typeof entry === 'string' && title) {
-              return <GroupCard {...{ key: entry, title, group: entry, index, folders, moveToFolder }} />;
+              return <GroupCard {...{ key: entry, title, group: entry, index, folders, moveToFolder, length }} />;
             } else if (entry && typeof entry !== 'string' && title) {
               return (
                 <FolderCard
-                  {...{ key: entry.folder, title, group: entry.folder, index, groups: entry.groups, folders, getTitle, moveToFolder, reorderGroup, deleteFolder }}
+                  {...{ key: entry.folder, title, group: entry.folder, index, groups: entry.groups, folders, getTitle, moveToFolder, reorderGroup, deleteFolder, length }}
                 />
               );
             }

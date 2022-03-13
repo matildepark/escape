@@ -1,14 +1,14 @@
 import React, { ReactElement } from 'react';
 import Helmet from 'react-helmet';
+import { IoBookmark } from 'react-icons/io5';
 import { Col, H2, H3, Icon, Row, Text } from '@tlon/indigo-react';
 import { useDark } from '~/logic/state/join';
 import { Body } from '~/views/components/Body';
-import BookmarkIcon from '~/assets/img/bookmark.svg';
 import { version } from '~/../package.json';
 
 export default function InfoScreen(props: any): ReactElement {
   const dark = useDark();
-  const bookmarkStyle = { height: 15, width: 12, paddingLeft: 1, color: dark ? 'white' : 'black' };
+  const bookmarkStyle = { height: 16, width: 14, color: dark ? 'white' : 'black' };
 
   return (
     <>
@@ -20,16 +20,17 @@ export default function InfoScreen(props: any): ReactElement {
           <H2>EScape Info</H2>
           <H3 mt={4}>What&apos;s in v{version}</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
-          <Text mt={1}>- Create Folders for groups and sort</Text>
-          <Text mt={1}>- Replace :emoji: with the html emoji inline in the text box. Note: desktop text editor doesn’t handle this well and you have to navigate away and then back to see it.</Text>
-          <Text mt={1}>- Option to send body in push notification in Settings {'>'} Notifications</Text>
-          <Text mt={1}>- Put links/notes and author in same component visually</Text>
+          <Text mt={1}>- Add Grid button in desktop header</Text>
+          <Text mt={1}>- Add folder open/closed icons</Text>
+          <Text mt={1}>- Allow {'"My channels"'} to be sorted like other groups and also filed in a group folder</Text>
           <Text mt={1}></Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
-          <Text mt={1}>- Dark mode emoji picker</Text>
-          <Text mt={1}>- Going to a chat message link that is more than 200(?) messages ago now routes correctly</Text>
-          <Text mt={1}>- Focus textbox after emoji selection</Text>
-          <Text mt={1}>- Check new links for valid URL format</Text>
+          <Text mt={1}>- Auto-focus add folder input</Text>
+          <Text mt={1}>- Dropdown should go up for groups at the bottom of the sorter</Text>
+          <Text mt={1}>- Unable to add urbit links to collection</Text>
+          <Text mt={1}>- Hoon evaluator in text editor not working</Text>
+          <Text mt={1}>- Handle avatar URLs that create errors</Text>
+          <Text mt={1}></Text>
           <Text mt={1}></Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>
@@ -38,7 +39,7 @@ export default function InfoScreen(props: any): ReactElement {
             <Text ml={2}>Reply to chat message</Text>
           </Row>
           <Row mt={1}>
-            <BookmarkIcon style={bookmarkStyle} className="actionIcon" />
+            <IoBookmark style={bookmarkStyle} className="actionIcon" />
             <Text ml={2}>Bookmark message by either adding to &apos;My Bookmarks&apos; collection or (if admin) any collection in current group</Text>
           </Row>
           <Row mt={1}>

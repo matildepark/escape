@@ -21,7 +21,7 @@ interface PendingSidebarGroupProps {
 
 function PendingSidebarGroup({ path }: PendingSidebarGroupProps) {
   const history = useHistory();
-  const { preview, error } = usePreview(path);
+  const { preview } = usePreview(path);
   const title = preview?.metadata?.title || path;
   const { toQuery } = useQuery();
   const onClick = (e: MouseEvent) => {
@@ -153,21 +153,25 @@ export function SidebarGroupList({
     .sort(sortGroupsAlph), [associations, groups]);
 
   useEffect(() => {
-    if (!groupOrder.length) {
+    if (!groupOrder.length)
       return;
-    }
-    // add groups to groupSorter.order if they're missing (as in, recently joined)
-    let sortedGroups = [];
-    for (const key in groupOrder) {
-      if (typeof groupOrder[key] === 'string' && groupList.find(e => e?.group === groupOrder[key])) {
-        sortedGroups.push(groupOrder[key]);
-      } else if (!(typeof groupOrder[key] === 'string') && groupOrder[key]?.groups) {
-        sortedGroups = sortedGroups.concat(groupOrder[key]?.groups);
+
+    const sortedGroups = groupOrder.reduce((acc, cur) => {
+      if (cur && typeof cur !== 'string') {
+        return acc.concat(cur.groups);
+      } else if (typeof cur === 'string') {
+        return acc.concat([cur]);
       }
-    }
+      return acc;
+    }, []);
+
     const missingGroups = groupList.map(({ group }) => group).filter(g => !sortedGroups.includes(g));
+    if (!sortedGroups.includes('My Channels')) {
+      missingGroups.push('My Channels');
+    }
+
     if (missingGroups.length) {
-      saveGroupOrder(groupOrder.concat(missingGroups));
+      saveGroupOrder(missingGroups.concat(groupOrder as any[]));
     }
   }, [groupList]);
 
@@ -192,7 +196,7 @@ export function SidebarGroupList({
   }
 
   if (changingSort) {
-    const groupsToSort = groupOrder.length ? groupOrder : groupList.map(g => g.group);
+    const groupsToSort = groupOrder.length ? groupOrder : ['My Channels'].concat(groupList.map(g => g.group));
     return <DragDropContext onDragEnd={handleDragAndDrop}>
       <SidebarGroupSorter {...{ groupOrder: groupsToSort, moveToFolder, reorderGroup, deleteFolder }} />
     </DragDropContext>;
@@ -200,9 +204,12 @@ export function SidebarGroupList({
 
   return (
     <>
-      <SidebarGroup {...props} workspace={{ type: 'home' }} />
       {groupOrder.length ? groupOrder.map((go) => {
         if (typeof go === 'string') {
+          if (go === 'My Channels') {
+            return <SidebarGroup {...props} workspace={{ type: 'home' }} />;
+          }
+
           const g = associations.groups[go];
           if (!g)
             return null;
@@ -215,11 +222,16 @@ export function SidebarGroupList({
         // TODO: handle folders in groupOrder
         return null;
       }) : (
-        groupList.map((g: any) => <SidebarGroup
-          key={g.group} {...props}
-          workspace={{ type: 'group', group: g.group }}
-          title={g.metadata.title}
-        />)
+        <>
+          <SidebarGroup {...props} workspace={{ type: 'home' }} />
+          {groupList.map((g: any) => (
+            <SidebarGroup
+              key={g.group} {...props}
+              workspace={{ type: 'group', group: g.group }}
+              title={g.metadata.title}
+            />
+          ))}
+        </>
       )}
       {pending.map(p => <PendingSidebarGroup key={p} path={p} />)}
     </>

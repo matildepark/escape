@@ -14,6 +14,7 @@ import { useHarkDm, useHarkStat } from '~/logic/state/hark';
 import useSettingsState from '~/logic/state/settings';
 import useGraphState from '~/logic/state/graph';
 import { usePreview } from '~/logic/state/metadata';
+import { IMAGE_NOT_FOUND } from '~/logic/constants/links';
 
 function useAssociationStatus(resource: string) {
   const [, , ship, name] = resource.split('/');
@@ -193,8 +194,8 @@ export const SidebarPendingItem = (props: {
   indent?: number;
 }) => {
   const { path, selected } = props;
-  const { preview, error } = usePreview(path);
-  const color = `#${uxToHex(preview?.metadata?.color || "0x0")}`;
+  const { preview } = usePreview(path);
+  const color = `#${uxToHex(preview?.metadata?.color || '0x0')}`;
   const title = preview?.metadata?.title || path;
   const to = `/~landscape/messages/pending/${path.slice(6)}`;
   return (
@@ -228,7 +229,7 @@ export const SidebarDmItem = React.memo(
   }) => {
     const { ship, selected = false, pending = false } = props;
     const contact = useContact(ship);
-    const { hideAvatars, hideNicknames } = useSettingsState((s) => s.calm);
+    const { hideAvatars, hideNicknames } = useSettingsState(s => s.calm);
     const title =
       !hideNicknames && contact?.nickname
         ? contact?.nickname
@@ -243,6 +244,10 @@ export const SidebarDmItem = React.memo(
           width="16px"
           height="16px"
           borderRadius={2}
+          onError={({ currentTarget }) => {
+            currentTarget.onerror = null; // prevents looping
+            currentTarget.src = IMAGE_NOT_FOUND;
+          }}
         />
       ) : (
         <Sigil

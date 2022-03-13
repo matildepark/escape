@@ -111,7 +111,7 @@ export const ChatInput = React.forwardRef(({
   }
 
   const submit = useCallback(async () => {
-    const text = `${reply.link}${parseEmojis(chatEditor.current?.getValue() || '')}`;
+    const text = `${reply.link}${chatEditor.current?.getValue() || ''}`;
 
     if (text === '')
       return;
@@ -120,7 +120,7 @@ export const ChatInput = React.forwardRef(({
       const output = await airlock.thread<string[]>(evalCord(text));
       onSubmit([{ code: { output, expression: text } }]);
     } else {
-      onSubmit(tokenizeMessage(text));
+      onSubmit(tokenizeMessage(parseEmojis(text)));
     }
 
     setInCodeMode(false);

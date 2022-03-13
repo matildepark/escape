@@ -72,6 +72,7 @@ const LinkSubmit = (props: LinkSubmitProps) => {
         setLinkValid(false);
         return;
       }
+      linkValid = true;
     }
 
     if (linkValid) {

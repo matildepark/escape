@@ -1,21 +1,23 @@
-import { BaseImage, Box, BoxProps, Center, Col, Icon, Row, Text } from '@tlon/indigo-react';
-import { uxToHex } from '@urbit/api';
-import shallow from 'zustand/shallow';
-import _ from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import VisibilitySensor from 'react-visibility-sensor';
 import styled from 'styled-components';
+import shallow from 'zustand/shallow';
+import _ from 'lodash';
+
+import { BaseImage, Box, BoxProps, Center, Col, Icon, Row, Text } from '@tlon/indigo-react';
+import { uxToHex } from '@urbit/api';
 import { getRelativePosition } from '~/logic/lib/relativePosition';
 import { Sigil } from '~/logic/lib/sigil';
 import { useCopy } from '~/logic/lib/useCopy';
 import { useOutsideClick } from '~/logic/lib/useOutsideClick';
 import { useContact } from '~/logic/state/contact';
 import useSettingsState, { SettingsState, useShowNickname } from '~/logic/state/settings';
+import { citeNickname } from '~/logic/lib/util';
+import { IMAGE_NOT_FOUND } from '~/logic/constants/links';
 import { Portal } from './Portal';
 import { ProfileStatus } from './ProfileStatus';
 import RichText from './RichText';
-import { citeNickname } from '~/logic/lib/util';
 import { PalsProfileInfo } from './Pals/PalsProfileInfo';
 
 export const OVERLAY_HEIGHT = 250;
@@ -121,6 +123,10 @@ const ProfileOverlay = (props: ProfileOverlayProps) => {
         height={60}
         width={60}
         borderRadius={2}
+        onError={({ currentTarget }) => {
+          currentTarget.onerror = null; // prevents looping
+          currentTarget.src = IMAGE_NOT_FOUND;
+        }}
       />
     ) : (
       <Box size={60} borderRadius={2} backgroundColor={color}>

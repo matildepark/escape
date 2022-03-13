@@ -3,8 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Col, Icon, Row, Text } from '@tlon/indigo-react';
 import { useCopy } from '~/logic/lib/useCopy';
 import { Dropdown } from '~/views/components/Dropdown';
-import BookmarkIcon from '~/assets/img/bookmark.svg';
-import BookmarkIconSolid from '~/assets/img/bookmark-fill.svg';
+import { IoBookmark, IoBookmarkOutline } from 'react-icons/io5';
 import useMetadataState from '~/logic/state/metadata';
 import useSettingsState from '~/logic/state/settings';
 import { useDark } from '~/logic/state/join';
@@ -54,10 +53,10 @@ const MessageActions = ({ onReply, onDelete, onLike, onBookmark, msg, isAdmin, p
     setBookmarkSuccess(!bookmarked);
   }, [msg, permalink, bookmarked]);
 
-  const bookmarkStyle = { height: 15, width: 12, paddingLeft: 1, color: dark ? 'white' : 'black' };
+  const bookmarkStyle = { height: 16, width: 14, color: dark ? 'white' : 'black' };
   const bookmarkIcon = bookmarkSuccess
-    ? <BookmarkIconSolid style={bookmarkStyle} className="actionIcon" />
-    : <BookmarkIcon style={bookmarkStyle} className="actionIcon" />;
+    ? <IoBookmark style={bookmarkStyle} className="actionIcon" />
+    : <IoBookmarkOutline style={bookmarkStyle} className="actionIcon" />;
 
   return (
     <Box

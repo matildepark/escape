@@ -5,6 +5,7 @@ import bigInt from 'big-integer';
 import moment from 'moment';
 import React, { Ref, useCallback, useEffect, useMemo, useState } from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
+import { IMAGE_NOT_FOUND } from '~/logic/constants/links';
 import { useIdlingState } from '~/logic/lib/idling';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import { Sigil } from '~/logic/lib/sigil';
@@ -99,6 +100,10 @@ export const MessageAuthor = React.memo<any>(({
         height={24}
         width={24}
         borderRadius={1}
+        onError={({ currentTarget }) => {
+          currentTarget.onerror = null; // prevents looping
+          currentTarget.src = IMAGE_NOT_FOUND;
+        }}
       />
     ) : (
       <Box

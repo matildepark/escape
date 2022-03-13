@@ -146,6 +146,16 @@ const StatusBar = (props) => {
             </Box>
           )}
         </StatusBarItem>
+        <StatusBarItem
+          as={Button}
+          width='32px'
+          mr={2}
+          onClick={() => {
+            window.location.href = '/apps/grid/';
+          }}
+        >
+          <Icon icon='Groups' />
+        </StatusBarItem>
         <Dropdown
           dropWidth='250px'
           width='auto'

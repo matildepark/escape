@@ -1,6 +1,7 @@
 import { BaseImage, Box, Row, Text } from '@tlon/indigo-react';
 import moment from 'moment';
 import React, { ReactElement, ReactNode } from 'react';
+import { IMAGE_NOT_FOUND } from '~/logic/constants/links';
 import { Sigil } from '~/logic/lib/sigil';
 import { citeNickname, uxToHex } from '~/logic/lib/util';
 import { useContact } from '~/logic/state/contact';
@@ -68,6 +69,10 @@ function Author(props: AuthorProps & PropFunc<typeof Box>): ReactElement {
         height={size}
         width={size}
         borderRadius={1}
+        onError={({ currentTarget }) => {
+          currentTarget.onerror = null; // prevents looping
+          currentTarget.src = IMAGE_NOT_FOUND;
+        }}
       />
     ) : sigil;
 
