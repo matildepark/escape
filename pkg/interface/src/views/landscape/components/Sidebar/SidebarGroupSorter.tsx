@@ -31,41 +31,13 @@ const GroupTileIcon = styled(Icon)`
   cursor: pointer;
 `;
 
-export interface MoveFolderArgs {
-  orig?: string;
-  dest?: string;
-  group: string;
-}
-
 interface GroupTileProps {
   title: string;
-  group: string;
-  folders: string[];
   folder?: string;
-  canReorder?: boolean;
-  isFirst?: boolean;
-  isLast?: boolean;
-  dropup?: boolean;
-  moveToFolder: (args: MoveFolderArgs) => void;
-  moveUp?: () => void;
-  moveDown?: () => void;
 }
 
-function GroupTile({
-  title,
-  group,
-  folders,
-  folder,
-  moveToFolder,
-  moveUp = () => null,
-  moveDown = () => null,
-  canReorder = false,
-  isFirst = false,
-  isLast = false,
-  dropup = false
-}: GroupTileProps) {
+function GroupTile({ title, folder }: GroupTileProps) {
   const isInFolder = Boolean(folder);
-  const alignY = dropup ? 'bottom' : 'top';
 
   return (
     <Row py={isInFolder ? 1 : 2} px={isInFolder ? 2 : 3}
@@ -76,41 +48,6 @@ function GroupTile({
       backgroundColor="white"
     >
       <Text overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis">{title}</Text>
-      <Row alignItems="center" mr={-1}>
-        {isInFolder && (
-          <>
-            {(canReorder && !isFirst) && <GroupTileIcon icon="ChevronNorth" onClick={moveUp} />}
-            {(canReorder && !isLast) && <GroupTileIcon icon="ChevronSouth" onClick={moveDown} />}
-          </>
-        )}
-        <Dropdown
-          dropWidth='192px'
-          width='auto'
-          alignY={alignY}
-          alignX='right'
-          flexShrink={0}
-          offsetY={-24}
-          options={
-            <Col
-              p={2}
-              backgroundColor='white'
-              border={1}
-              borderColor="lightGray"
-              borderRadius={2}
-              maxHeight="160px"
-              overflowY="scroll"
-            >
-              <Text>Move to folder:</Text>
-              {folder && <FolderRow onClick={() => moveToFolder({ orig: folder, group })}>Remove from {folder}</FolderRow>}
-              {folders.filter(f => f !== folder).map(f => (
-                <FolderRow key={f} onClick={() => moveToFolder({ orig: folder, dest: f, group })}>{f}</FolderRow>
-              ))}
-            </Col>
-          }
-        >
-          <GroupTileIcon icon="Menu" />
-        </Dropdown>
-      </Row>
     </Row>
   );
 }
@@ -119,16 +56,13 @@ interface GroupCardProps {
   title: string;
   group: string;
   index: number;
-  length: number;
-  folders: string[];
-  moveToFolder: (args: MoveFolderArgs) => void;
 }
 
-function GroupCard({ title, group, index, length, folders, moveToFolder }: GroupCardProps) {
+function GroupCard({ title, group, index }: GroupCardProps) {
   return (
     <Draggable key={group} draggableId={group} index={index}>
       {provided => <Box ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-        <GroupTile {...{ title, folders, group, moveToFolder }} dropup={length - index < 5} />
+        <GroupTile {...{ title, group }} />
       </Box>}
     </Draggable>
   );
@@ -138,12 +72,8 @@ interface FolderCardProps {
   title: string;
   group: string;
   index: number;
-  length: number;
   groups: string[];
-  folders: string[];
   getTitle: (g: string | GroupFolder) => string;
-  moveToFolder: (args: MoveFolderArgs) => void;
-  reorderGroup: (folder: string, group: string, index: number, direction: 'up' | 'down') => void;
   deleteFolder: (folder: string) => void;
 }
 
@@ -151,16 +81,11 @@ function FolderCard({
   title,
   group,
   index,
-  length,
   groups,
-  folders,
   getTitle,
-  moveToFolder,
-  reorderGroup,
   deleteFolder
 }: FolderCardProps) {
   const dark = useDark();
-
   return (
     <Draggable key={group} draggableId={group} index={index}>
       {provided => (
@@ -201,20 +126,16 @@ function FolderCard({
               <GroupTileIcon icon="Menu" />
             </Dropdown>
           </Row>
-          <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mx={-2} mt={2} px={1} py={0} borderRadius={2} minHeight="30px">
-            {groups.map((g, i) => (
-              <GroupTile
-                key={g} title={getTitle(g)}
-                group={g} folder={title}
-                canReorder={groups.length > 1} folders={folders}
-                isFirst={i === 0} isLast={i === groups.length - 1}
-                moveUp={() => reorderGroup(title, g, i, 'up')}
-                moveDown={() => reorderGroup(title, g, i, 'down')}
-                moveToFolder={moveToFolder}
-                dropup={(length - index) + (groups.length - i) < 6}
-              />
-            ))}
-          </Box>
+          <Droppable droppableId={title} style={{ width: '100%' }}>
+            {provided => (
+              <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mx={-2} mt={2} px={1} py={0} borderRadius={2} minHeight="30px">
+                {groups.map((g, i) => {
+                  return (!g || !getTitle(g)) ? null : <GroupCard key={g} title={getTitle(g)} group={g} index={i} />;
+                })}
+                {provided.placeholder}
+              </Box>
+            )}
+          </Droppable>
         </Col>
       )}
     </Draggable>
@@ -223,15 +144,11 @@ function FolderCard({
 
 interface SidebarGroupSorterProps {
   groupOrder?: GroupOrder;
-  moveToFolder: (args: MoveFolderArgs) => void;
-  reorderGroup: (folder: string, group: string, index: number, direction: 'up' | 'down') => void;
   deleteFolder: (folder: string) => void;
 }
 
 export function SidebarGroupSorter({
   groupOrder = [],
-  moveToFolder,
-  reorderGroup,
   deleteFolder
 }: SidebarGroupSorterProps): ReactElement {
   const { associations } = useMetadataState();
@@ -242,7 +159,6 @@ export function SidebarGroupSorter({
 
     return typeof g === 'string' ? associations.groups[g]?.metadata?.title : g?.folder;
   }, [associations]);
-  const folders = groupOrder.filter(entry => entry && typeof entry !== 'string').map(({ folder }: any) => folder);
 
   return (
     <Droppable droppableId="groups" style={{ width: '100%' }}>
@@ -251,11 +167,11 @@ export function SidebarGroupSorter({
           {groupOrder.map((entry, index, { length }) => {
             const title = getTitle(entry);
             if (typeof entry === 'string' && title) {
-              return <GroupCard {...{ key: entry, title, group: entry, index, folders, moveToFolder, length }} />;
+              return <GroupCard {...{ key: entry, title, group: entry, index }} />;
             } else if (entry && typeof entry !== 'string' && title) {
               return (
                 <FolderCard
-                  {...{ key: entry.folder, title, group: entry.folder, index, groups: entry.groups, folders, getTitle, moveToFolder, reorderGroup, deleteFolder, length }}
+                  {...{ key: entry.folder, title, group: entry.folder, index, groups: entry.groups, getTitle, deleteFolder }}
                 />
               );
             }

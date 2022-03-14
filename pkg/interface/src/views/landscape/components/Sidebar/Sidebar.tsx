@@ -34,8 +34,7 @@ interface SidebarProps {
   workspace: Workspace;
 }
 
-export function Sidebar(props: SidebarProps): ReactElement | null {
-  const { baseUrl, selected, workspace, recentGroups } = props;
+export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarProps): ReactElement | null {
   const groupPath = getGroupFromWorkspace(workspace);
   const [changingSort, setChangingSort] = useState(false);
   const { groupSorter, putEntry } = useSettingsState.getState();
@@ -68,7 +67,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
 
   const role = groups?.[groupPath] ? roleForShip(groups[groupPath], window.ship) : undefined;
   const isAdmin = (role === 'admin') || (workspace?.type === 'home');
-  const focusMessages = props.baseUrl.includes('~landscape/messages');
+  const focusMessages = baseUrl.includes('~landscape/messages');
   let groupsHeight = `calc(75% - ${HEADER_HEIGHT / 2}px)`;
   let messagesHeight = `calc(25% - ${HEADER_HEIGHT / 2}px)`;
   if (isSmallScreen && focusMessages) {
@@ -114,7 +113,7 @@ export function Sidebar(props: SidebarProps): ReactElement | null {
           pb={1}
         >
           <Box mt={2} />
-          <SidebarGroupList {...groupListProps} changingSort={changingSort} />
+          <SidebarGroupList {...groupListProps} {...{ changingSort }} />
         </ScrollbarLessCol>
       )}
       {(!changingSort && !isSmallScreen || focusMessages) && (

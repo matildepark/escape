@@ -12,7 +12,7 @@ import useInviteState from '~/logic/state/invite';
 import { sortGroupsAlph } from '~/views/apps/launch/components/Groups';
 import { Box, LoadingSpinner } from '@tlon/indigo-react';
 import { useQuery } from '~/logic/lib/useQuery';
-import { GroupOrder, MoveFolderArgs, SidebarGroupSorter } from './SidebarGroupSorter';
+import { GroupOrder, SidebarGroupSorter } from './SidebarGroupSorter';
 import { SidebarFolder, SidebarGroup } from './SidebarGroup';
 
 interface PendingSidebarGroupProps {
@@ -74,53 +74,40 @@ export function SidebarGroupList({
   const handleDragAndDrop = useCallback(({ source, destination }) => {
     if (!destination)
       return;
+    // Do nothing if trying to put a folder inside a folder
+    if (source.droppableId === 'groups' && destination.droppableId !== 'groups' && typeof groupOrder[source.index] !== 'string')
+      return;
 
     const items = Array.from(groupOrder);
-    const [reorderedItem] = items.splice(source.index, 1);
-    items.splice(destination.index, 0, reorderedItem);
-    saveGroupOrder(items);
-  }, [groupOrder, saveGroupOrder]);
-
-  const moveToFolder = useCallback(({ orig, dest, group }: MoveFolderArgs) => {
-    if (orig) {
-      const newOrder = groupOrder.map((go) => {
-        if (go && typeof go !== 'string' && go.folder === orig) {
-          return { folder: orig, groups: go.groups.filter(g => g !== group) };
-        } else if (go && typeof go !== 'string' && go.folder === dest) {
-          return { folder: dest, groups: go.groups.concat([group]) };
-        }
-        return go;
-      });
-      if (!dest) {
-        newOrder.unshift(group);
-      }
-      saveGroupOrder(newOrder);
+    let reorderedItem;
+    if (source.droppableId === 'groups') {
+      reorderedItem = items.splice(source.index, 1)[0];
     } else {
-      const newOrder = groupOrder
-        .map((go) => {
-          if (go && typeof go !== 'string' && go.folder === dest) {
-            return { folder: dest, groups: go.groups.concat([group]) };
-          }
-          return go;
-        })
-        .filter(go => typeof go !== 'string' || go !== group);
+      const folder = items.find(go => go && typeof go !== 'string' && go.folder === source.droppableId);
 
-      saveGroupOrder(newOrder);
-    }
-  }, [groupOrder, saveGroupOrder]);
-
-  const reorderGroup = useCallback((folder: string, group: string, index: number, direction: 'up' | 'down') => {
-    const newOrder = groupOrder.map((go) => {
-      if (go && typeof go !== 'string' && go.folder === folder) {
-        const newIndex = direction === 'up' ? index - 1 : index + 1;
-        const groups = Array.from(go.groups);
-        const [reorderedGroup] = groups.splice(index, 1);
-        groups.splice(newIndex, 0, reorderedGroup);
-        return { folder, groups };
+      if (typeof folder !== 'string') {
+        reorderedItem = folder.groups.splice(source.index, 1)[0];
+      } else {
+        return;
       }
-      return go;
-    });
-    saveGroupOrder(newOrder);
+    }
+
+    if (!reorderedItem)
+      return;
+
+    if (destination.droppableId === 'groups') {
+      items.splice(destination.index, 0, reorderedItem);
+    } else {
+      const folder = items.find(go => go && typeof go !== 'string' && go.folder === destination.droppableId);
+
+      if (typeof folder !== 'string') {
+        folder.groups.splice(destination.index, 0, reorderedItem);
+      } else {
+        return;
+      }
+    }
+
+    saveGroupOrder(items);
   }, [groupOrder, saveGroupOrder]);
 
   const deleteFolder = useCallback((folder: string) => {
@@ -198,7 +185,7 @@ export function SidebarGroupList({
   if (changingSort) {
     const groupsToSort = groupOrder.length ? groupOrder : ['My Channels'].concat(groupList.map(g => g.group));
     return <DragDropContext onDragEnd={handleDragAndDrop}>
-      <SidebarGroupSorter {...{ groupOrder: groupsToSort, moveToFolder, reorderGroup, deleteFolder }} />
+      <SidebarGroupSorter {...{ groupOrder: groupsToSort, deleteFolder }} />
     </DragDropContext>;
   }
 

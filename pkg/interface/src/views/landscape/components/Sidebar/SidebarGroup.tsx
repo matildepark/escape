@@ -36,10 +36,10 @@ const getHasNotification = (associations: Associations, group: string, unseen: T
 
 export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
   config: SidebarListConfig;
+  workspace: Workspace;
   baseUrl: string;
   selected?: string;
   title?: string;
-  workspace: Workspace;
 }): ReactElement {
   const groupRef = useRef<HTMLElement>(null);
   const isMessages = workspace.type === 'messages';
@@ -53,9 +53,9 @@ export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
 
   useEffect(() => {
     if (isGroup && groupSelected && groupRef.current) {
-      groupRef.current.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => groupRef.current.scrollIntoView(), 100);
     }
-  }, [isGroup, groupSelected, groupRef]);
+  }, []);
 
   const { associations } = useMetadataState();
   const { groups } = useGroupState();
@@ -272,6 +272,10 @@ export const SidebarFolder = ({
       {!collapsed && (
         <Box position="relative" style={{ zIndex: 0 }} pl="20px">
           {folder.groups.map((group) => {
+            if (group === 'My Channels') {
+              return <SidebarGroup key={group} {...props} workspace={{ type: 'home' }} />;
+            }
+
             const g = associations.groups[group];
             if (!g)
               return null;
