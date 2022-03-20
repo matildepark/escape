@@ -1,19 +1,32 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Box, Text, Row, Button, Icon, H2, Col, H3 } from '@tlon/indigo-react';
+import useHarkState from '~/logic/state/hark';
+import usePalsState from '~/logic/state/pals';
+import useGroupState from '~/logic/state/group';
+import useMetadataState from '~/logic/state/metadata';
 import { NewGroup } from '~/views/landscape/components/NewGroup';
 import ModalButton from '~/views/apps/launch/components/ModalButton';
 import Tile from '~/views/apps/launch/components/tiles/tile';
 import { ScrollbarLessBox } from '~/views/apps/launch/App';
-import useHarkState from "~/logic/state/hark";
+import { sortGroupsAlph } from '~/views/apps/launch/components/Groups';
 import { NewBox } from '~/views/apps/notifications/NewBox';
 import { version } from '~/../package.json';
-import usePalsState from '~/logic/state/pals';
 
 export function UqbarHome(props) {
   const history = useHistory();
-  const { notificationsCount } = useHarkState();
   const { pending } = usePalsState();
+  const { notificationsCount } = useHarkState();
+  const { associations } = useMetadataState();
+  const { groups } = useGroupState();
+  const groupList = useMemo(() => Object.values(associations?.groups || {})
+    .filter(e => e?.group in groups)
+    .sort(sortGroupsAlph), [associations, groups]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 8000);
+  }, []);
 
   return (
     <ScrollbarLessBox
@@ -27,6 +40,16 @@ export function UqbarHome(props) {
       <Link to='/~info'>
         <H3 ml={3} borderBottom="1px solid gray">App Info</H3>
       </Link>
+      {(!loading && !groupList.length) && (
+        <Col ml={3} mt={3}>
+          <H3 mb={2}>
+            New here?
+          </H3>
+          <Link to="/?join-kind=groups&join-path=%2Fship%2F%7Erondev%2Fgroup-discovery">
+            Join ~rondev/group-discovery to find some groups
+          </Link>
+        </Col>
+      )}
       {(notificationsCount === 0/* && pending.length === 0*/) && <Text ml={3} mt={3}>No notifications</Text>}
       <NewBox hideLabel />
       <Box

@@ -1,17 +1,16 @@
 import React, { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { resourceAsPath } from '@urbit/api';
-import _ from 'lodash';
-import { DragDropContext } from 'react-beautiful-dnd';
-
-import { SidebarItemBase } from './SidebarItem';
-import { SidebarListConfig } from './types';
-import useMetadataState, { usePreview } from '~/logic/state/metadata';
 import { useHistory } from 'react-router';
+import { DragDropContext } from 'react-beautiful-dnd';
+import _ from 'lodash';
+import { resourceAsPath } from '@urbit/api';
+import { Box, LoadingSpinner } from '@tlon/indigo-react';
+
+import useMetadataState, { usePreview } from '~/logic/state/metadata';
 import useGroupState from '~/logic/state/group';
 import useInviteState from '~/logic/state/invite';
-import { sortGroupsAlph } from '~/views/apps/launch/components/Groups';
-import { Box, LoadingSpinner } from '@tlon/indigo-react';
 import { useQuery } from '~/logic/lib/useQuery';
+import { sortGroupsAlph } from '~/views/apps/launch/components/Groups';
+import { SidebarItemBase } from './SidebarItem';
 import { GroupOrder, SidebarGroupSorter } from './SidebarGroupSorter';
 import { SidebarFolder, SidebarGroup } from './SidebarGroup';
 
@@ -55,7 +54,6 @@ export function SidebarGroupList({
   saveGroupOrder,
   ...props
 }: {
-  config: SidebarListConfig;
   baseUrl: string;
   changingSort?: boolean;
   selected?: string;

@@ -17,7 +17,7 @@ import useLocalState from '~/logic/state/local';
 import useSettingsState from '~/logic/state/settings';
 import useGraphState from '~/logic/state/graph';
 import { ShortcutContextProvider } from '~/logic/lib/shortcutContext';
-import { IS_MOBILE, isMobileWeb } from '~/logic/lib/platform';
+import { IS_MOBILE } from '~/logic/lib/platform';
 
 import ErrorBoundary from '~/views/components/ErrorBoundary';
 import { MobileNavbar } from '~/views/components/navigation/MobileNavbar';

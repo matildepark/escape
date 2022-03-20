@@ -6,7 +6,6 @@ import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { roleForShip } from '~/logic/lib/group';
 import { IS_MOBILE, IS_SHORT_SCREEN } from '~/logic/lib/platform';
-import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 import { getGroupFromWorkspace } from '~/logic/lib/workspace';
 import useGroupState from '~/logic/state/group';
 import useSettingsState from '~/logic/state/settings';
@@ -14,7 +13,6 @@ import { Workspace } from '~/types';
 import { getNavbarHeight } from '~/views/components/navigation/MobileNavbar';
 import { GroupSwitcher } from '../GroupSwitcher';
 import { SidebarGroupList } from './SidebarGroupList';
-import { SidebarListConfig } from './types';
 import { GroupOrder } from './SidebarGroupSorter';
 
 export const HEADER_HEIGHT = 48;
@@ -53,14 +51,6 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
     }
   }, [groupSorter.order]);
 
-  const [config] = useLocalStorageState<SidebarListConfig>(
-    `group-config:${groupPath || 'home'}`,
-    {
-      sortBy: 'lastUpdated',
-      hideUnjoined: false
-    }
-  );
-
   const groups = useGroupState(state => state.groups);
   const navbarHeight = getNavbarHeight();
   const isSmallScreen = IS_MOBILE || IS_SHORT_SCREEN;
@@ -81,7 +71,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
     groupsHeight = `calc(100% - ${HEADER_HEIGHT}px)`;
   }
 
-  const groupListProps = { config, selected, baseUrl, changingSort, groupOrder, saveGroupOrder };
+  const groupListProps = { selected, baseUrl, changingSort, groupOrder, saveGroupOrder };
 
   return (
     <Box>

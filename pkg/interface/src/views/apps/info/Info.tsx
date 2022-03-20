@@ -20,17 +20,15 @@ export default function InfoScreen(props: any): ReactElement {
           <H2>EScape Info</H2>
           <H3 mt={4}>What&apos;s in v{version}</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
-          <Text mt={1}>- Add Grid button in desktop header</Text>
-          <Text mt={1}>- Add folder open/closed icons</Text>
-          <Text mt={1}>- Allow {'"My channels"'} to be sorted like other groups and also filed in a group folder</Text>
+          <Text mt={1}>- Collapse folders when ordering</Text>
+          <Text mt={1}>- If no groups have been joined, show a link to the Group Discovery group on the home page</Text>
+          <Text mt={1}>- Show notebook (and link) date as well as time</Text>
+          <Text mt={1}>- Display an explanatory modal the first time a user opens Order Groups</Text>
+          <Text mt={1}>- Close button for mentions</Text>
           <Text mt={1}></Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
-          <Text mt={1}>- Auto-focus add folder input</Text>
-          <Text mt={1}>- Dropdown should go up for groups at the bottom of the sorter</Text>
-          <Text mt={1}>- Unable to add urbit links to collection</Text>
-          <Text mt={1}>- Hoon evaluator in text editor not working</Text>
-          <Text mt={1}>- Handle avatar URLs that create errors</Text>
-          <Text mt={1}></Text>
+          <Text mt={1}>- Hide unsubscribed channels for all groups</Text>
+          <Text mt={1}>- Add space after colon in DM reply</Text>
           <Text mt={1}></Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>

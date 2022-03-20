@@ -19,5 +19,5 @@ export const quoteReply = (post: Post) => {
     .split('\n')
     .map(l => `> ${l}`)
     .join('\n');
-  return `${reply}\n\n~${post.author}:`;
+  return `${reply}\n\n~${post.author}: `;
 };

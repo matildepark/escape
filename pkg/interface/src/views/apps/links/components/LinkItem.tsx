@@ -160,11 +160,11 @@ export const LinkItem = React.forwardRef((props: LinkItemProps, ref: RefObject<H
     <Row minWidth={0} flexShrink={0} width="100%" justifyContent="space-between" py={2}>
       <Author
         showImage
-        isRelativeTime
         ship={author}
         date={node.post['time-sent']}
         group={group}
         lineHeight={1}
+        showDate
       />
       <Box ml="auto">
         <Link

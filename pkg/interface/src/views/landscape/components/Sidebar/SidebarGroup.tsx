@@ -21,6 +21,8 @@ import { SidebarListConfig } from './types';
 import { dmUnreads, getItems, sidebarSort } from './util';
 import { GroupFolder } from './SidebarGroupSorter';
 import { SidebarAssociationItem, SidebarDmItem, SidebarItemBase, SidebarPendingItem } from './SidebarItem';
+import { getGroupFromWorkspace } from '~/logic/lib/workspace';
+import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 
 const getHasNotification = (associations: Associations, group: string, unseen: Timebox) => {
   let hasNotification = false;
@@ -34,22 +36,30 @@ const getHasNotification = (associations: Associations, group: string, unseen: T
   return hasNotification;
 };
 
-export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
-  config: SidebarListConfig;
+export function SidebarGroup({ baseUrl, selected, workspace, title }: {
   workspace: Workspace;
   baseUrl: string;
   selected?: string;
   title?: string;
 }): ReactElement {
   const groupRef = useRef<HTMLElement>(null);
+  const isGroup = workspace.type === 'group';
   const isMessages = workspace.type === 'messages';
   const isHome = workspace.type === 'home';
-  const isGroup = workspace.type === 'group';
+  const groupPath = getGroupFromWorkspace(workspace);
   const groupSelected =
     (isMessages && baseUrl.includes('messages')) ||
     (isHome && baseUrl.includes('home')) ||
     (workspace.type === 'group' && (baseUrl.replace('/~landscape', '') === workspace.group || baseUrl.includes(`${workspace.group}/resource`)));
   const [collapsed, setCollapsed] = useState(!groupSelected && !isMessages);
+
+  const [config] = useLocalStorageState<SidebarListConfig>(
+    `group-config:${groupPath || 'home'}`,
+    {
+      sortBy: 'lastUpdated',
+      hideUnjoined: false
+    }
+  );
 
   useEffect(() => {
     if (isGroup && groupSelected && groupRef.current) {
@@ -112,7 +122,6 @@ export function SidebarGroup({ baseUrl, selected, config, workspace, title }: {
 
   const hasNotification = workspace.type === 'group' && getHasNotification(associations, workspace.group, unseen);
   const graphUnreads = getGraphUnreads(associations || ({} as Associations));
-  const groupPath = isGroup ? workspace.group : '';
   const unreadCount = isGroup ? graphUnreads(groupPath) : dmUnreads(unreads);
   const isSynced = true;
   const isPending = false;

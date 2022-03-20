@@ -1,6 +1,6 @@
 /* eslint-disable max-lines-per-function */
 import React, { useRef, useState, ClipboardEvent, useEffect, useImperativeHandle, useCallback, useMemo } from 'react';
-import { BaseTextArea, Box, Row } from '@tlon/indigo-react';
+import { BaseTextArea, Box, Icon, Row } from '@tlon/indigo-react';
 import { Association, Group, invite } from '@urbit/api';
 import * as ob from 'urbit-ob';
 import 'codemirror/addon/display/placeholder';
@@ -398,6 +398,9 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
           mentionCursor={mentionCursor}
           selectMember={selectMember}
         />}
+        <Box position="absolute" top="0" left="0" cursor="pointer">
+          <Icon icon="X" px="4px" py="6px" onClick={() => setDisableAutocomplete(true)} />
+        </Box>
       </Box>}
       {isMobile
         ? <MobileBox

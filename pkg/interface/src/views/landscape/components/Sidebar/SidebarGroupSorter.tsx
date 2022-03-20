@@ -1,12 +1,14 @@
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Droppable, Draggable } from 'react-beautiful-dnd';
-import { FaFolder } from 'react-icons/fa';
+import { FaFolder, FaFolderOpen } from 'react-icons/fa';
 
-import { Box, Col, Icon, Row, Text } from '@tlon/indigo-react';
+import { Box, Button, Col, Icon, Label, Row, Text } from '@tlon/indigo-react';
 import useMetadataState from '~/logic/state/metadata';
 import { Dropdown } from '~/views/components/Dropdown';
 import styled from 'styled-components';
 import { useDark } from '~/logic/state/join';
+import { useModal } from '~/logic/lib/useModal';
+import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 
 export type GroupFolder = {
   folder: string,
@@ -86,6 +88,9 @@ function FolderCard({
   deleteFolder
 }: FolderCardProps) {
   const dark = useDark();
+  const [collapsed, setCollapsed] = useState(false);
+  const folderStyle = { height: '14px', width: '18px', padding: '4px', marginLeft: '-4px', color: dark ? 'white' : 'black' };
+
   return (
     <Draggable key={group} draggableId={group} index={index}>
       {provided => (
@@ -101,7 +106,11 @@ function FolderCard({
         >
           <Row alignItems="center" justifyContent="space-between" ml={-1}>
             <Row alignItems="center">
-              <FaFolder style={{ height: '14px', width: '18px', paddingRight: '4px', color: dark ? 'white' : 'black' }} />
+              {collapsed ? (
+                <FaFolder style={folderStyle} cursor="pointer" onClick={() => setCollapsed(!collapsed)} />
+              ) : (
+                <FaFolderOpen style={folderStyle} cursor="pointer" onClick={() => setCollapsed(!collapsed)} />
+              )}
               <Text fontWeight="600">{title}</Text>
             </Row>
             <Dropdown
@@ -126,16 +135,18 @@ function FolderCard({
               <GroupTileIcon icon="Menu" />
             </Dropdown>
           </Row>
-          <Droppable droppableId={title} style={{ width: '100%' }}>
-            {provided => (
-              <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mx={-2} mt={2} px={1} py={0} borderRadius={2} minHeight="30px">
-                {groups.map((g, i) => {
-                  return (!g || !getTitle(g)) ? null : <GroupCard key={g} title={getTitle(g)} group={g} index={i} />;
-                })}
-                {provided.placeholder}
-              </Box>
-            )}
-          </Droppable>
+          {!collapsed && (
+            <Droppable droppableId={title} style={{ width: '100%' }}>
+              {provided => (
+                <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mx={-2} mt={2} px={1} py={0} borderRadius={2} minHeight="30px">
+                  {groups.map((g, i) => {
+                    return (!g || !getTitle(g)) ? null : <GroupCard key={g} title={getTitle(g)} group={g} index={i} />;
+                  })}
+                  {provided.placeholder}
+                </Box>
+              )}
+            </Droppable>
+          )}
         </Col>
       )}
     </Draggable>
@@ -153,6 +164,10 @@ export function SidebarGroupSorter({
 }: SidebarGroupSorterProps): ReactElement {
   const { associations } = useMetadataState();
 
+  const [hasSeenInfoModal, setHasSeenInfoModal] = useLocalStorageState(
+    'sortingInfoModalShown', false
+  );
+
   const getTitle = useCallback((g: string | GroupFolder) => {
     if (g === 'My Channels')
       return g;
@@ -160,27 +175,57 @@ export function SidebarGroupSorter({
     return typeof g === 'string' ? associations.groups[g]?.metadata?.title : g?.folder;
   }, [associations]);
 
-  return (
-    <Droppable droppableId="groups" style={{ width: '100%' }}>
-      {provided => (
-        <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mt="-8px" mb="-4px">
-          {groupOrder.map((entry, index, { length }) => {
-            const title = getTitle(entry);
-            if (typeof entry === 'string' && title) {
-              return <GroupCard {...{ key: entry, title, group: entry, index }} />;
-            } else if (entry && typeof entry !== 'string' && title) {
-              return (
-                <FolderCard
-                  {...{ key: entry.folder, title, group: entry.folder, index, groups: entry.groups, getTitle, deleteFolder }}
-                />
-              );
-            }
+  const { modal, showModal } = useModal({ modal:
+    (dismiss: () => void) => {
+      const onCancel = (e) => {
+        e.stopPropagation();
+        dismiss();
+      };
+      return (
+        <Col p={4}>
+          <Text fontWeight={600}>Order Groups and Folders</Text>
+          <Label mt={2}>
+            Use the {'"+"'} button to create a folder. Drag and drop groups to change the order.
+            Drop a group on top of the gray folder area to add it to the folder.
+          </Label>
+          <Row mt={2} justifyContent="center">
+            <Button onClick={onCancel}>Got it</Button>
+          </Row>
+        </Col>
+      );
+    } });
 
-            return null;
-          })}
-          {provided.placeholder}
-        </Box>
-      )}
-    </Droppable>
+  useEffect(() => {
+    if (!hasSeenInfoModal) {
+      showModal();
+      setHasSeenInfoModal(true);
+    }
+  }, []);
+
+  return (
+    <>
+      <Droppable droppableId="groups" style={{ width: '100%' }}>
+        {provided => (
+          <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mt="-8px" mb="-4px">
+            {groupOrder.map((entry, index, { length }) => {
+              const title = getTitle(entry);
+              if (typeof entry === 'string' && title) {
+                return <GroupCard {...{ key: entry, title, group: entry, index }} />;
+              } else if (entry && typeof entry !== 'string' && title) {
+                return (
+                  <FolderCard
+                    {...{ key: entry.folder, title, group: entry.folder, index, groups: entry.groups, getTitle, deleteFolder }}
+                  />
+                );
+              }
+
+              return null;
+            })}
+            {provided.placeholder}
+          </Box>
+        )}
+      </Droppable>
+      {modal}
+    </>
   );
 }

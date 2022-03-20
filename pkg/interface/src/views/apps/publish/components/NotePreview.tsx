@@ -110,6 +110,7 @@ export function NotePreview(props: NotePreviewProps) {
           date={post?.['time-sent']}
           group={group}
           unread={isUnread}
+          showDate
         />
         <Box ml="auto" mr={1}>
           <Link to={url}>

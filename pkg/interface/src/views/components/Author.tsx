@@ -22,6 +22,7 @@ export interface AuthorProps {
   isRelativeTime?: boolean;
   dontShowTime?: boolean;
   gray?: boolean;
+  showDate?: boolean;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -33,8 +34,9 @@ function Author(props: AuthorProps & PropFunc<typeof Box>): ReactElement {
     fullNotIcon,
     children,
     unread,
-    isRelativeTime,
+    isRelativeTime = false,
     dontShowTime,
+    showDate = false,
     lineHeight = 1,
     gray = false,
     ...rest
@@ -106,13 +108,14 @@ function Author(props: AuthorProps & PropFunc<typeof Box>): ReactElement {
         </ProfileOverlay>
       </Box>
       <Box display='flex' alignItems='baseline'>
-        { !dontShowTime && time && (
+        { (!dontShowTime && time) && (
           <Timestamp
             height="fit-content"
             relative={isRelativeTime}
             stamp={stamp}
             fontSize={0}
             time={time}
+            date={showDate}
             whiteSpace='nowrap'
             ml={2}
             color={unread ? 'blue' : 'gray'}
