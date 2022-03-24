@@ -1,12 +1,13 @@
 import { Box } from '@tlon/indigo-react';
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import React from 'react';
 import Helmet from 'react-helmet';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import useHarkState from '~/logic/state/hark';
 import { Workspace } from '~/types/workspace';
 import { Body } from '../components/Body';
 import { GroupsPane } from './components/GroupsPane';
+import { AppsPane } from './components/Apps/AppsPane';
 import { NewGroup } from './components/NewGroup';
 import './css/custom.css';
 import _ from 'lodash';
@@ -37,6 +38,7 @@ const makeGroupWorkspace = _.memoize((group: string): Workspace => ({ type: 'gro
 const homeWorkspace: Workspace = { type: 'home' };
 const uqbarWorkspace: Workspace = { type: 'uqbar-home' };
 const messagesWorkspace: Workspace = { type: 'messages' };
+const appsWorkspace: Workspace = { type: 'apps' };
 
 export default function Landscape() {
   const notificationsCount = useHarkState(s => s.notificationsCount);
@@ -67,6 +69,9 @@ export default function Landscape() {
         </Route>
         <Route path="/~landscape/home">
           <GroupsPane workspace={homeWorkspace} baseUrl="/~landscape/home" />
+        </Route>
+        <Route path="/~landscape/apps">
+          <AppsPane workspace={appsWorkspace} baseUrl="/~landscape/apps" />
         </Route>
         <Route path="/~landscape/messages">
           <GroupsPane workspace={messagesWorkspace} baseUrl="/~landscape/messages" />

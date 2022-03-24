@@ -17,10 +17,10 @@ import { useDark } from '~/logic/state/join';
 import { useChatStore, useReplyStore } from '~/logic/state/chat';
 import { AutocompletePatp } from './AutocompletePatp';
 import '../css/custom.css';
-import { EMOJI_REGEX, parseEmojis } from '~/views/landscape/components/Graph/parse';
+import { parseEmojis } from '~/views/landscape/components/Graph/parse';
 
-export const SIG_REGEX = /(?:^|\s)(~)(?=\s|$)/;
-export const MENTION_REGEX = /(?:^|\s)(~)(?![a-z]{6}\-[a-z]{6}[?=\s|$])(?![a-z]{6}[?=\s|$])([a-z\-]+)(?=\s|$)/;
+export const SIG_REGEX = /(?:^|\s)(~)$/;
+export const MENTION_REGEX = /(?:^|\s)(~)(?![a-z]{6}\-[a-z]{6}[?=\s|$])(?![a-z]{6}[?=\s|$])([a-z\-]+)$/;
 export const isMobile = Boolean(MOBILE_BROWSER_REGEX.test(navigator.userAgent));
 
 const MARKDOWN_CONFIG = {
@@ -267,34 +267,43 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
 
     if (!group || memberArray.length > 500 || !value.includes('~'))
       return;
-    const sigMatch = SIG_REGEX.test(value);
-    const mentionMatch = MENTION_REGEX.test(value);
 
-    if (sigMatch || mentionMatch) {
-      const valueWithoutMembers = memberArray.reduce((cleaned, m) => cleaned.replace(`~${m}`, ''), value);
+    // test both of these against value.slice of the cursor position
+    const cursor = editorRef?.current?.getCursor();
+    if (cursor) {
+      const testValue = isMobile
+        ? value.slice(0, cursor)
+        : (editorRef?.current?.getDoc()?.getRange({ line: 0, ch: 0 }, cursor) || '');
 
-      if (sigMatch && SIG_REGEX.test(valueWithoutMembers)) {
-        setAutocompleteValues(true, memberArray.filter(m => !value.includes(m)), '');
-      } else if (mentionMatch && MENTION_REGEX.test(valueWithoutMembers)) {
-        const [patp] = valueWithoutMembers.match(MENTION_REGEX);
-        const ship = patp.replace(/\s*?~/, '');
-        const isValid = ob.isValidPatp(patp.replace(' ', ''));
+      const sigMatch = SIG_REGEX.test(testValue);
+      const mentionMatch = MENTION_REGEX.test(testValue);
 
-        const matchingMembers = memberArray.filter(m => m.includes(ship) && !value.includes(m));
-        const includesMember = matchingMembers.includes(ship);
-        if (!matchingMembers.length || includesMember) {
-          setAutocompleteValues(isValid, [], patp);
+      if (sigMatch || mentionMatch) {
+        const valueWithoutMembers = memberArray.reduce((cleaned, m) => cleaned.replace(`~${m}`, ''), testValue);
+
+        if (sigMatch && SIG_REGEX.test(valueWithoutMembers)) {
+          setAutocompleteValues(true, memberArray.filter(m => !testValue.includes(m)), '');
+        } else if (mentionMatch && MENTION_REGEX.test(valueWithoutMembers)) {
+          const [patp] = valueWithoutMembers.match(MENTION_REGEX);
+          const ship = patp.replace(/\s*?~/, '');
+          const isValid = ob.isValidPatp(patp.replace(' ', ''));
+
+          const matchingMembers = memberArray.filter(m => m.includes(ship) && !testValue.includes(m));
+          const includesMember = matchingMembers.includes(ship);
+          if (!matchingMembers.length || includesMember) {
+            setAutocompleteValues(isValid, [], patp);
+          } else {
+            setAutocompleteValues(Boolean(matchingMembers.length), matchingMembers, '');
+          }
         } else {
-          setAutocompleteValues(Boolean(matchingMembers.length), matchingMembers, '');
+          setAutocompleteValues(false, [], '');
         }
       } else {
         setAutocompleteValues(false, [], '');
       }
-    } else {
-      setAutocompleteValues(false, [], '');
-    }
 
-    setMentionCursor(0);
+      setMentionCursor(0);
+    }
   };
 
   const hasSuggestions = autocompleteSuggestions.length > 0;
@@ -412,6 +421,7 @@ const ChatEditor = React.forwardRef<CodeMirrorShim, ChatEditorProps>(({
                 editor.element.focus();
               }
             }}
+            height="100%"
           >
             <BaseTextArea
               fontFamily={inCodeMode ? 'Source Code Pro' : 'Inter'}

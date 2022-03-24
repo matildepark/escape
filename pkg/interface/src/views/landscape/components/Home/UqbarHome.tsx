@@ -46,7 +46,7 @@ export function UqbarHome(props) {
             New here?
           </H3>
           <Link to="/?join-kind=groups&join-path=%2Fship%2F%7Erondev%2Fgroup-discovery">
-            Join ~rondev/group-discovery to find some groups
+            <Text>Join <Text color="blue">~rondev/group-discovery</Text> to find some groups</Text>
           </Link>
         </Col>
       )}

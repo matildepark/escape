@@ -15,4 +15,8 @@ interface UqbarHome {
   type: 'uqbar-home'
 }
 
-export type Workspace = HomeWorkspace | GroupWorkspace | Messages | UqbarHome;
+interface AppsWorkspace {
+  type: 'apps'
+}
+
+export type Workspace = HomeWorkspace | GroupWorkspace | Messages | UqbarHome | AppsWorkspace;

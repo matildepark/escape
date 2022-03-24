@@ -12,6 +12,8 @@ export function getTitleFromWorkspace(
       return 'Home';
     case 'messages':
       return 'Messages';
+    case 'apps':
+      return 'My Apps';
     case 'group':
       const association = associations.groups[workspace.group];
       return association?.metadata?.title || '';

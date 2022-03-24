@@ -109,7 +109,7 @@ function GraphPermalink(
         await getNode(ship, name, index);
         setLoading(false);
       } catch (e) {
-        console.log(e);
+        console.warn(e);
         setLoading(false);
         setErrored(true);
       }

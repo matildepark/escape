@@ -169,7 +169,7 @@ export function SidebarGroupSorter({
   );
 
   const getTitle = useCallback((g: string | GroupFolder) => {
-    if (g === 'My Channels')
+    if (g === 'My Channels' || g === 'My Apps')
       return g;
 
     return typeof g === 'string' ? associations.groups[g]?.metadata?.title : g?.folder;

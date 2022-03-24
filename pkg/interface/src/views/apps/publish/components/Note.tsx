@@ -101,19 +101,19 @@ export function Note(props: NoteProps & RouteComponentProps) {
       </Link>
       <Col>
         <Text display="block" mb={2}>{title || ''}</Text>
-        <Row alignItems="center">
+        <Row alignItems="center" maxWidth="500px">
           <Author
             showImage
             isRelativeTime
             ship={post?.author}
             date={post?.['time-sent']}
             group={group}
-          >
-            <Row px={2} gapX={2} alignItems="flex-end" height="14px">
-              <Action bg="white" onClick={doCopy}>{copyDisplay}</Action>
-              {adminLinks}
-            </Row>
-          </Author>
+            maxNameWidth="225px"
+          />
+          <Row px={2} gapX={2} alignItems="flex-end" height="14px">
+            <Action bg="white" onClick={doCopy}>{copyDisplay}</Action>
+            {adminLinks}
+          </Row>
         </Row>
       </Col>
       <NoteContent post={post} />

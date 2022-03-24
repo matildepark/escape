@@ -68,6 +68,8 @@ return (
 );
 }
 
+const NON_GROUP_WORKSPACES = ['home', 'uqbar-home', 'messages', 'apps'];
+
 export function GroupSwitcher(props: {
   workspace: Workspace;
   baseUrl: string;
@@ -85,7 +87,8 @@ const title = getTitleFromWorkspace(associations, workspace);
 const groupPath = getGroupFromWorkspace(workspace);
 const [folder, setFolder] = useState('');
 const [folderCreated, setFolderCreated] = useState(false);
-const metadata = (workspace.type === 'home' || workspace.type  === 'uqbar-home' || workspace.type  === 'messages')
+const showTitleActions = NON_GROUP_WORKSPACES.includes(workspace.type);
+const metadata = showTitleActions
   ? undefined
   : associations.groups[workspace.group].metadata;
 const navTo = (to: string) => `${props.baseUrl}${to}`;
@@ -96,7 +99,6 @@ const [config, setConfig] = useLocalStorageState<SidebarListConfig>(
     hideUnjoined: false
   }
 );
-const showTitleActions = (props.workspace?.type === 'messages' || props.workspace?.type === 'home' || props.workspace?.type === 'uqbar-home');
 
 const addGroupFolder = useCallback(() => {
   if (folder && !groupOrder.find(go => go && typeof go !== 'string' && go?.folder === folder)) {

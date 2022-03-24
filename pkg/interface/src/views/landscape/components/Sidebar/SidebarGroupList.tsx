@@ -12,7 +12,9 @@ import { useQuery } from '~/logic/lib/useQuery';
 import { sortGroupsAlph } from '~/views/apps/launch/components/Groups';
 import { SidebarItemBase } from './SidebarItem';
 import { GroupOrder, SidebarGroupSorter } from './SidebarGroupSorter';
-import { SidebarFolder, SidebarGroup } from './SidebarGroup';
+import {  SidebarGroup } from './SidebarGroup';
+import { SidebarFolder } from './SidebarFolder';
+import { MyApps } from './MyApps';
 
 interface PendingSidebarGroupProps {
   path: string;
@@ -59,6 +61,7 @@ export function SidebarGroupList({
   selected?: string;
   messages?: boolean;
   groupOrder: GroupOrder;
+  showOnlyUnread: boolean;
   saveGroupOrder: (groupOrder: GroupOrder) => void;
 }): ReactElement {
   const { associations } = useMetadataState();
@@ -154,6 +157,9 @@ export function SidebarGroupList({
     if (!sortedGroups.includes('My Channels')) {
       missingGroups.push('My Channels');
     }
+    if (!sortedGroups.includes('My Apps')) {
+      missingGroups.push('My Apps');
+    }
 
     if (missingGroups.length) {
       saveGroupOrder(missingGroups.concat(groupOrder as any[]));
@@ -181,7 +187,7 @@ export function SidebarGroupList({
   }
 
   if (changingSort) {
-    const groupsToSort = groupOrder.length ? groupOrder : ['My Channels'].concat(groupList.map(g => g.group));
+    const groupsToSort = groupOrder.length ? groupOrder : ['My Channels', 'My Apps'].concat(groupList.map(g => g.group));
     return <DragDropContext onDragEnd={handleDragAndDrop}>
       <SidebarGroupSorter {...{ groupOrder: groupsToSort, deleteFolder }} />
     </DragDropContext>;
@@ -193,6 +199,8 @@ export function SidebarGroupList({
         if (typeof go === 'string') {
           if (go === 'My Channels') {
             return <SidebarGroup {...props} workspace={{ type: 'home' }} />;
+          } else if (go === 'My Apps') {
+            return <MyApps {...props} />;
           }
 
           const g = associations.groups[go];
@@ -201,7 +209,7 @@ export function SidebarGroupList({
 
           return <SidebarGroup key={g.group} {...props} workspace={{ type: 'group', group: g.group }} title={g.metadata.title} />;
         } else if (go?.folder) {
-          return <SidebarFolder toggleCollapse={toggleCollapse(go.folder)} {...props} folder={go} />;
+          return <SidebarFolder {...props} toggleCollapse={toggleCollapse(go.folder)} {...props} folder={go} />;
         }
 
         // TODO: handle folders in groupOrder

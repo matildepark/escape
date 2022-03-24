@@ -28,6 +28,7 @@ export function TitleActions(props: {
   );
   const groupPath = getGroupFromWorkspace(props.workspace);
   const isHome = props.workspace.type === 'uqbar-home';
+  const isApps = props.workspace.type === 'apps';
 
   return (
     <Row
@@ -67,7 +68,11 @@ export function TitleActions(props: {
             <Icon icon="Plus" color="gray" pr='12px' />
           </Dropdown>
         )
-        : !isHome && (
+        : isApps ? (
+          <Link style={{ display: 'inline-block' }} to='/~landscape/apps/new'>
+            <Icon icon="Plus" color="gray" pr='12px' />
+          </Link>
+        ) : !isHome && (
           <Link style={{ display: 'inline-block' }}
             to={groupPath
               ? `/~landscape${groupPath}/new`
@@ -78,10 +83,8 @@ export function TitleActions(props: {
           )
         }
       {isHome ? (
-        <>
-          <Button onClick={props.toggleChangingSort}>Order Groups</Button>
-        </>
-      ) : (
+        <Button onClick={props.toggleChangingSort}>Order Groups</Button>
+      ) : !isApps && (
         <Dropdown
           flexShrink={0}
           width="auto"

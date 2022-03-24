@@ -23,6 +23,7 @@ export interface AuthorProps {
   dontShowTime?: boolean;
   gray?: boolean;
   showDate?: boolean;
+  maxNameWidth?: string | number;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -39,6 +40,7 @@ function Author(props: AuthorProps & PropFunc<typeof Box>): ReactElement {
     showDate = false,
     lineHeight = 1,
     gray = false,
+    maxNameWidth,
     ...rest
   } = props;
 
@@ -101,6 +103,7 @@ function Author(props: AuthorProps & PropFunc<typeof Box>): ReactElement {
               overflow="hidden"
               textOverflow="ellipsis"
               whiteSpace="nowrap"
+              maxWidth={maxNameWidth}
             >
               {name}
             </Text>

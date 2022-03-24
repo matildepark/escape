@@ -1,7 +1,6 @@
 import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
 import _ from 'lodash';
-import { FaFolder, FaFolderOpen } from 'react-icons/fa';
 import { Associations, Timebox } from '@urbit/api';
 import { Box, Icon } from '@tlon/indigo-react';
 
@@ -14,17 +13,15 @@ import useGroupState from '~/logic/state/group';
 import useInviteState from '~/logic/state/invite';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import { roleForShip } from '~/logic/lib/group';
-import { useDark } from '~/logic/state/join';
 import { Workspace } from '~/types/workspace';
 import { getGraphUnreads } from '~/views/apps/launch/components/Groups';
 import { SidebarListConfig } from './types';
 import { dmUnreads, getItems, sidebarSort } from './util';
-import { GroupFolder } from './SidebarGroupSorter';
 import { SidebarAssociationItem, SidebarDmItem, SidebarItemBase, SidebarPendingItem } from './SidebarItem';
 import { getGroupFromWorkspace } from '~/logic/lib/workspace';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 
-const getHasNotification = (associations: Associations, group: string, unseen: Timebox) => {
+export const getHasNotification = (associations: Associations, group: string, unseen: Timebox) => {
   let hasNotification = false;
   for (const key in unseen) {
     const formattedKey = key.replace('landscape/graph', '/ship').replace('/mention', '');
@@ -36,9 +33,10 @@ const getHasNotification = (associations: Associations, group: string, unseen: T
   return hasNotification;
 };
 
-export function SidebarGroup({ baseUrl, selected, workspace, title }: {
+export function SidebarGroup({ baseUrl, selected, showOnlyUnread, workspace, title }: {
   workspace: Workspace;
   baseUrl: string;
+  showOnlyUnread: boolean;
   selected?: string;
   title?: string;
 }): ReactElement {
@@ -124,7 +122,6 @@ export function SidebarGroup({ baseUrl, selected, workspace, title }: {
   const graphUnreads = getGraphUnreads(associations || ({} as Associations));
   const unreadCount = isGroup ? graphUnreads(groupPath) : dmUnreads(unreads);
   const isSynced = true;
-  const isPending = false;
   const to = `/~landscape${isGroup ? workspace?.group : isMessages ? '/messages' : '/home'}`;
   const isMobileMessages = IS_MOBILE && isMessages;
   const groupTitle = title ? title : isHome ? 'My Channels' : 'Messages';
@@ -133,38 +130,43 @@ export function SidebarGroup({ baseUrl, selected, workspace, title }: {
   const isAdmin = isGroup && roleForShip(groups[workspace.group], window.ship) === 'admin';
   const locked = isGroup && Boolean(groups[association.group]?.policy?.invite);
 
+  if (showOnlyUnread && unreadCount === 0 && !groupSelected) {
+    return null;
+  }
+
   return (
     <Box ref={groupRef} position="relative">
-      {!isMobileMessages && <SidebarItemBase
-        to={to}
-        selected={groupSelected}
-        hasUnread={unreadCount > 0}
-        unreadCount={unreadCount}
-        isSynced={isSynced}
-        title={groupTitle}
-        hasNotification={hasNotification}
-        pending={isPending}
-        onClick={() => setCollapsed(isMessages ? false : !collapsed)}
-        isGroup
-        locked={locked}
-        isAdmin={isAdmin}
-        open={!collapsed}
-      >
-        {!isMessages && (
-          <Icon
-            p={1}
-            pr="0"
-            display="block"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setCollapsed(!collapsed);
-              groupRef.current?.scrollIntoView();
-            }}
-            icon={collapsed ? 'TriangleEast' : 'TriangleSouth'}
-          />
-        )}
-      </SidebarItemBase>}
+      {!isMobileMessages && (
+        <SidebarItemBase
+          to={to}
+          selected={groupSelected}
+          hasUnread={unreadCount > 0}
+          unreadCount={unreadCount}
+          isSynced={isSynced}
+          title={groupTitle}
+          hasNotification={hasNotification}
+          onClick={() => setCollapsed(isMessages ? false : !collapsed)}
+          isGroup
+          locked={locked}
+          isAdmin={isAdmin}
+          open={!collapsed}
+        >
+          {!isMessages && (
+            <Icon
+              p={1}
+              pr="0"
+              display="block"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setCollapsed(!collapsed);
+                groupRef.current?.scrollIntoView();
+              }}
+              icon={collapsed ? 'TriangleEast' : 'TriangleSouth'}
+            />
+          )}
+        </SidebarItemBase>
+      )}
       {!collapsed && (
         <Box position="relative" style={{ zIndex: 0 }}>
           {feedPath && IS_MOBILE && <SidebarItemBase
@@ -186,27 +188,34 @@ export function SidebarGroup({ baseUrl, selected, workspace, title }: {
           {ordered.map((pathOrShip) => {
             const pathAsGraph = pathOrShip.replace('ship', 'graph');
             const { count, each } = unreads[pathAsGraph] || { count: 0, each: [] };
+            const isDm = pathOrShip.startsWith('~');
+            const isPending = pending.includes(pathOrShip);
+            const channelSelected = pathOrShip === selected;
 
-            return pathOrShip.startsWith('~') ? (
+            if (showOnlyUnread && !isDm && !channelSelected && (count + each.length) === 0) {
+              return null;
+            }
+
+            return isDm ? (
                 <SidebarDmItem
                   key={pathOrShip}
                   ship={pathOrShip}
                   workspace={workspace}
-                  selected={pathOrShip === selected}
-                  pending={pending.includes(pathOrShip)}
+                  selected={channelSelected}
+                  pending={isPending}
                   indent={0.5}
                 />
-              ) : pending.includes(pathOrShip) ? (
+              ) : isPending ? (
                 <SidebarPendingItem
                   key={pathOrShip}
                   path={pathOrShip}
-                  selected={pathOrShip === selected}
+                  selected={channelSelected}
                   indent={1}
                 />
               ) : (
               <SidebarAssociationItem
                 key={pathOrShip}
-                selected={pathOrShip === selected}
+                selected={channelSelected}
                 groupSelected={groupSelected}
                 association={associations.graph[pathOrShip]}
                 hideUnjoined={config.hideUnjoined}
@@ -223,76 +232,3 @@ export function SidebarGroup({ baseUrl, selected, workspace, title }: {
     </Box>
   );
 }
-
-interface SidebarFolderProps {
-  config: SidebarListConfig;
-  baseUrl: string;
-  folder: GroupFolder;
-  toggleCollapse: () => void;
-}
-
-export const SidebarFolder = ({
-  folder,
-  toggleCollapse,
-  ...props
-}: SidebarFolderProps) => {
-  const { associations } = useMetadataState();
-  const graphUnreads = getGraphUnreads(associations || ({} as Associations));
-  const { unseen } = useHarkState();
-  const collapsed = Boolean(folder.collapsed);
-  const dark = useDark();
-  const folderIconStyle = {
-    height: '14px',
-    width: '18px',
-    paddingTop: '3px',
-    color: dark ? 'white' : 'black'
-  };
-
-  const { unreadCount, hasNotification } = folder.groups.reduce((acc, group) => {
-    return {
-      unreadCount: acc.unreadCount + graphUnreads(group),
-      hasNotification: acc.hasNotification || getHasNotification(associations, group, unseen)
-    };
-  }, { unreadCount: 0, hasNotification: false });
-
-  return (
-    <Box position="relative">
-      <SidebarItemBase
-        to={''}
-        title={folder.folder}
-        hasUnread={unreadCount > 0}
-        unreadCount={unreadCount}
-        hasNotification={hasNotification}
-        onClick={toggleCollapse}
-        isFolder
-        isSynced
-        open={!collapsed}
-      >
-        <Box display="block" pl="2px"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleCollapse();
-          }}
-        >
-          {collapsed ? <FaFolder style={folderIconStyle} /> : <FaFolderOpen style={folderIconStyle} />}
-        </Box>
-      </SidebarItemBase>
-      {!collapsed && (
-        <Box position="relative" style={{ zIndex: 0 }} pl="20px">
-          {folder.groups.map((group) => {
-            if (group === 'My Channels') {
-              return <SidebarGroup key={group} {...props} workspace={{ type: 'home' }} />;
-            }
-
-            const g = associations.groups[group];
-            if (!g)
-              return null;
-
-            return <SidebarGroup key={g.group} {...props} workspace={{ type: 'group', group: g.group }} title={g.metadata.title} />;
-          })}
-        </Box>
-      )}
-    </Box>
-  );
-};

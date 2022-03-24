@@ -39,8 +39,8 @@ export function SidebarItemBase(props: {
   to: string;
   selected?: boolean;
   groupSelected?: boolean;
-  hasNotification: boolean;
-  hasUnread: boolean;
+  hasNotification?: boolean;
+  hasUnread?: boolean;
   unreadCount?: number;
   isSynced?: boolean;
   children?: ReactNode;
@@ -52,6 +52,7 @@ export function SidebarItemBase(props: {
   isFolder?: boolean;
   locked?: boolean;
   isAdmin?: boolean;
+  isApps?: boolean;
   open?: boolean;
   indent?: number;
   onClick?: (e: MouseEvent) => void;
@@ -63,8 +64,8 @@ export function SidebarItemBase(props: {
     selected = false,
     groupSelected = false,
     fontSize,
-    hasNotification,
-    hasUnread,
+    hasNotification = false,
+    hasUnread = false,
     unreadCount = 0,
     isSynced = false,
     mono = false,
@@ -73,6 +74,7 @@ export function SidebarItemBase(props: {
     isFolder = false,
     locked = false,
     isAdmin = false,
+    isApps = false,
     open = false,
     indent = 0,
     onClick
@@ -183,6 +185,15 @@ export function SidebarItemBase(props: {
             </Link>
           </Box>
         )}
+        {isApps && (
+          <Box>
+            <Link to={`${to}/new`}>
+              <Row display="flex" alignItems="center">
+                <Icon icon="Plus" color="gray" pl={1} />
+              </Row>
+            </Link>
+          </Box>
+        )}
       </Row>
     </HoverBoxLink>
   );
@@ -252,7 +263,7 @@ export const SidebarDmItem = React.memo(
       ) : (
         <Sigil
           ship={ship}
-          color={`#${uxToHex(contact?.color || "0x0")}`}
+          color={`#${uxToHex(contact?.color || '0x0')}`}
           icon
           padding={2}
           size={16}
