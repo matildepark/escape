@@ -138,7 +138,7 @@
         ?.  ?=(%hark-update p.cage.sign)
           `this
         =+  !<(hark-update=update:hark-store q.cage.sign)
-        =^  cards  state
+        =^  cards  notifications
           (filter-notifications:do hark-update)
         [cards this]
       ::
@@ -162,22 +162,40 @@
 ::
 ++  filter-notifications
   |=  upd=update:hark-store
-  ^-  (quip card _state)
-  ?+    -.upd  `state
+  ^-  (quip card _notifications)
+  ?+    -.upd  `notifications
+  ::
+      %more
+    =|  cards=(list card)
+    |-
+    ?~  more.upd  [cards notifications]
+    =^  cs  notifications
+      (filter-notifications i.more.upd)
+    $(cards (welp cards cs), more.upd t.more.upd)
+  ::
+      %read-count
+    =/  uids  ~(tap in (uids-for-place place.upd))
+    |-
+    ?~  uids
+      `notifications
+    %_  $
+      notifications  (~(del by notifications) i.uids)
+      uids           t.uids
+    ==
   ::
       %add-note
     ::  read from settings-store
     ::
     ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-bucket/landscape/escape-app/noun)
-      `state
+      `notifications
     ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-entry/landscape/escape-app/expo-token/noun)
-      `state
+      `notifications
     =/  =data:settings
       .^(data:settings %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/entry/landscape/escape-app/expo-token/noun)
     ?.  ?=(%entry -.data)
-      `state
+      `notifications
     ?.  ?=(%s -.val.data)
-      `state
+      `notifications
     ::
     =/  include-details=?
       ?.  .^(? %gx /(scot %p our.bowl)/settings-store/(scot %da now.bowl)/has-bucket/landscape/(scot %tas 'pushNotifications')/noun)
@@ -197,6 +215,8 @@
       :~  ['Content-Type' 'application/json']
       ==
     =/  note=notification  +.upd
+    =/  =uid  (shas %notify-uid eny.bowl)
+    =.  notifications  (~(put by notifications) uid note)
     =/  title=@t  (contents-to-cord title.body.note)
     =/  json-list=(list [@t json])
       :~  to+s+p.val.data
@@ -205,6 +225,7 @@
           %-  pairs:enjs:format
           :~  redirect+s+(get-notification-redirect link.body.note)
               ship+s+(scot %p our.bowl)
+              badge+n+~(wyt by notifications)
       ==  ==
     =.  json-list
       ?:  include-details
@@ -222,8 +243,18 @@
       %-  pairs:enjs:format
       json-list
     ==
-    [~[[%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]] state]
+    :_  notifications
+    [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]~
   ==
+::
+++  uids-for-place
+  |=  =place:hark
+  %-  ~(gas in *(set uid))
+  %+  murn  ~(tap by notifications)
+  |=  [=uid =notification]
+  ^-  (unit ^uid)
+  ?.  =(place.bin.notification place)  ~
+  `uid
 ::
 ++  contents-to-cord
   |=  contents=(list content:hark-store)
