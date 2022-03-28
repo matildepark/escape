@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Helmet from 'react-helmet';
 import { Route, Switch } from 'react-router-dom';
 import { Workspace } from '~/types/workspace';
@@ -8,7 +8,7 @@ import '~/views/apps/publish/css/custom.css';
 import { Skeleton } from '../Skeleton';
 import { EXCLUDED_DESKS } from '../Sidebar/MyApps';
 import { Tile } from './AppTile';
-import { Box, Col, Row, Text } from '@tlon/indigo-react';
+import { Box, Col, Icon, Row, Text } from '@tlon/indigo-react';
 import { IS_MOBILE } from '~/logic/lib/platform';
 
 interface AppsPaneProps {
@@ -21,6 +21,7 @@ export function AppsPane(props: AppsPaneProps) {
   const relativePath = (path: string) => baseUrl + path;
   const { charges } = useDocketState.getState();
   const chargesList = Object.values(charges).filter(({ desk }) => !EXCLUDED_DESKS.includes(desk));
+  const [fullScreen, setFullScreen] = useState(false);
 
   return (
     <Switch>
@@ -35,10 +36,17 @@ export function AppsPane(props: AppsPaneProps) {
                     <Text>{'<- Back'}</Text>
                   </Box>
                 )}
-                <Col p={4}>
+                <Col p={4} height="100%">
                   <Text fontWeight={600}>Recommended Apps</Text>
                   <Text>This section is still under development.</Text>
-                  <Text>We recommended installing new apps from Grid.</Text>
+                  <Text>We recommended installing new apps from Grid (below).</Text>
+                  <iframe src={`${window.location.origin}/apps/grid/`} style={{
+                    display: 'flex',
+                    height: '100%',
+                    width: '100%',
+                    marginTop: 8
+                    }}
+                  />
                 </Col>
               </Col>
             </Skeleton>
@@ -61,12 +69,13 @@ export function AppsPane(props: AppsPaneProps) {
           return (
             <Skeleton
               mobileHide
+              desktopHide={fullScreen}
               recentGroups={[]}
               selected={app}
               {...props}
               baseUrl={match.path}
             >
-              <Col height="100%" width="100%">
+              <Col height="100%" width="100%" position="relative">
                 {IS_MOBILE && (
                   <Box p={2} onClick={() => history.push(props?.baseUrl ?? '/')}>
                     <Text>{'<- Back'}</Text>
@@ -79,6 +88,15 @@ export function AppsPane(props: AppsPaneProps) {
                   borderBottomRightRadius: 4
                   }}
                 />
+                {!IS_MOBILE && (
+                  <Box position="absolute" p={2}
+                    borderBottomLeftRadius={4} right="0"
+                    background="white" cursor="pointer"
+                    onClick={() => setFullScreen(!fullScreen)}
+                  >
+                    <Icon icon={fullScreen ? 'ArrowExternal' : 'ArrowExpand'} />
+                  </Box>
+                )}
               </Col>
             </Skeleton>
           );

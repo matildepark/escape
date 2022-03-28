@@ -16,7 +16,8 @@ import { GroupSwitcher } from '../GroupSwitcher';
 import { SidebarGroupList } from './SidebarGroupList';
 import { GroupOrder } from './SidebarGroupSorter';
 
-export const HEADER_HEIGHT = 45 + 40;
+export const FOLDER_FOCUS_HEIGHT = 40;
+export const HEADER_HEIGHT = 50 + FOLDER_FOCUS_HEIGHT;
 
 const ScrollbarLessCol = styled(Col)`
   scrollbar-width: none !important;
@@ -43,6 +44,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
   const [showOnlyUnread, setShowOnlyUnread] = useLocalStorageState(
     'showOnlyUnread', false
   );
+  const focusMessages = baseUrl.includes('~landscape/messages');
 
   const saveGroupOrder = useCallback((newOrder) => {
     const validOrder = newOrder.filter(o => o);
@@ -68,11 +70,10 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
 
   const role = groups?.[groupPath] ? roleForShip(groups[groupPath], window.ship) : undefined;
   const isAdmin = (role === 'admin') || (workspace?.type === 'home');
-  const focusMessages = baseUrl.includes('~landscape/messages');
   let groupsHeight = `calc(75% - ${HEADER_HEIGHT / 2}px)`;
   let messagesHeight = `calc(25% - ${HEADER_HEIGHT / 2}px)`;
   if (isSmallScreen && focusMessages) {
-    messagesHeight = `calc(100% - ${(IS_SHORT_SCREEN ? 0 : navbarHeight) + HEADER_HEIGHT}px)`;
+    messagesHeight = `calc(100% - ${(IS_SHORT_SCREEN ? 0 : navbarHeight) + HEADER_HEIGHT - FOLDER_FOCUS_HEIGHT}px)`;
   } else if (isSmallScreen) {
     groupsHeight = `calc(100% - ${(IS_SHORT_SCREEN ? 0 : navbarHeight) + HEADER_HEIGHT}px)`;
   } else if (focusMessages) {
@@ -87,6 +88,9 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
   const folderIconStyle = { height: '14px', width: '18px', padding: '2px', marginRight: '12px', cursor: 'pointer', color: dark ? 'white' : 'black' };
   const smallButtonProps = { fontSize: '13px', py: 0, px: 2, height: '24px' };
 
+  const showGroups = !isSmallScreen || !focusMessages || (showOnlyUnread && !focusMessages);
+  const showMessages = !changingSort && !showOnlyUnread && !isSmallScreen || focusMessages;
+
   return (
     <Box>
       <GroupSwitcher
@@ -99,15 +103,17 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
         groupOrder={groupOrder}
         saveGroupOrder={saveGroupOrder}
       />
-      <Row alignItems="center" justifyContent="space-between" px="14px" py={2} borderRight={1} borderBottom={1} borderColor="lightGray" flexWrap="wrap">
-        <Row alignItems="center">
-          <FaFolder style={folderIconStyle} onClick={() => collapseAllFolders(true)} />
-          <FaFolderOpen style={folderIconStyle} onClick={() => collapseAllFolders(false)} />
+      {!focusMessages && (
+        <Row alignItems="center" justifyContent="space-between" px="14px" py={2} borderRight={1} borderBottom={1} borderColor="lightGray" flexWrap="wrap">
+          <Row alignItems="center">
+            <FaFolder style={folderIconStyle} onClick={() => collapseAllFolders(true)} />
+            <FaFolderOpen style={folderIconStyle} onClick={() => collapseAllFolders(false)} />
+          </Row>
+          {!showOnlyUnread && <Button {...smallButtonProps} onClick={() => setShowOnlyUnread(true)}>Focus Unread</Button>}
+          {showOnlyUnread && <Button {...smallButtonProps} onClick={() => setShowOnlyUnread(false)}>Show All</Button>}
         </Row>
-        {!showOnlyUnread && <Button {...smallButtonProps} onClick={() => setShowOnlyUnread(true)}>Focus Unread</Button>}
-        {showOnlyUnread && <Button {...smallButtonProps} onClick={() => setShowOnlyUnread(false)}>Show All</Button>}
-      </Row>
-      {(!isSmallScreen || !focusMessages || showOnlyUnread) && (
+      )}
+      {showGroups && (
         <ScrollbarLessCol
           display="flex"
           width="100%"
@@ -127,7 +133,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
           <SidebarGroupList {...groupListProps} {...{ changingSort }} />
         </ScrollbarLessCol>
       )}
-      {(!changingSort && !showOnlyUnread && !isSmallScreen || focusMessages) && (
+      {showMessages && (
         <ScrollbarLessCol
           display="flex"
           width="100%"

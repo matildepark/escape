@@ -111,6 +111,7 @@ export function NotePreview(props: NotePreviewProps) {
           group={group}
           unread={isUnread}
           showDate
+          maxNameWidth="200px"
         />
         <Box ml="auto" mr={1}>
           <Link to={url}>

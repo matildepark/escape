@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Icon, Row, Text } from '@tlon/indigo-react';
-import { useHovering } from '~/logic/lib/util';
+import { cite, useHovering } from '~/logic/lib/util';
 import { IS_MOBILE } from '~/logic/lib/platform';
 
 interface LikeIndicatorProps {
@@ -28,7 +28,7 @@ export function LikeIndicator ({
     return null;
   }
 
-  const likeInfoText = `Liked by: ${likers.slice(0, 40).join(', ')}${likers.length > 40 ? ` and ${likers.length - 40} more` : ''}`;
+  const likeInfoText = `Liked by: ${likers.slice(0, 40).map(l => cite(l, true)).join(', ')}${likers.length > 40 ? ` and ${likers.length - 40} more` : ''}`;
 
   return (
     <Row

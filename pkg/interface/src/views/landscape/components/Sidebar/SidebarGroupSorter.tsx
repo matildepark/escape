@@ -138,7 +138,7 @@ function FolderCard({
           {!collapsed && (
             <Droppable droppableId={title} style={{ width: '100%' }}>
               {provided => (
-                <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mx={-2} mt={2} px={1} py={0} borderRadius={2} minHeight="30px">
+                <Box {...provided.droppableProps} ref={provided.innerRef} backgroundColor="washedGray" mx={-2} mt={2} px={1} py={0} borderRadius={2} minHeight="60px">
                   {groups.map((g, i) => {
                     return (!g || !getTitle(g)) ? null : <GroupCard key={g} title={getTitle(g)} group={g} index={i} />;
                   })}

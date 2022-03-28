@@ -12,6 +12,7 @@ interface SkeletonProps {
   selected?: string;
   baseUrl: string;
   mobileHide?: boolean;
+  desktopHide?: boolean;
   workspace: Workspace;
 }
 
@@ -22,19 +23,20 @@ export const Skeleton = React.memo((props: SkeletonProps): ReactElement => {
   }, []));
 
   const hideMobileSidebar = props.mobileHide && IS_MOBILE;
+  const hideDesktopSidebar = props.desktopHide && !IS_MOBILE;
 
   return (
     <Body
       display="grid"
       gridTemplateColumns={
-        sidebar
+        sidebar && !hideDesktopSidebar
         ?  ['100%', 'minmax(200px, 1fr) 3fr', 'minmax(250px, 1fr) 4fr', 'minmax(300px, 1fr) 5fr']
         : '100%'
       }
       gridTemplateRows="100%"
     >
       <ErrorBoundary>
-        { sidebar && !hideMobileSidebar && (
+        { (sidebar && !hideMobileSidebar && !hideDesktopSidebar) && (
           <Sidebar
             recentGroups={props.recentGroups}
             selected={props.selected}

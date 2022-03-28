@@ -20,16 +20,12 @@ export default function InfoScreen(props: any): ReactElement {
           <H2>EScape Info</H2>
           <H3 mt={4}>What&apos;s in v{version}</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
-          <Text mt={1}>- Toggle to show only unread folders, groups, channels</Text>
-          <Text mt={1}>- Add buttons to open and close all folders</Text>
-          <Text mt={1}>- Add My Apps section with embedded apps</Text>
+          <Text mt={1}>- Option (on desktop) to fullscreen the app pane</Text>
           <Text mt={1}></Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
-          <Text mt={1}>- Using leap to open a channel/group does not expand the group in the sidebar if the group is in a folder</Text>
-          <Text mt={1}>- Cannot like a message that has the “x new messages” indicator over it</Text>
-          <Text mt={1}>- Hide notebook header overflow</Text>
-          <Text mt={1}>- Make mention feature specific to where the cursor is and do not show on trailing space</Text>
-          <Text mt={1}>- Text box not scrollable on mobile after large text input</Text>
+          <Text mt={1}>- Truncate moon & comet names in likes</Text>
+          <Text mt={1}>- (mobile) When focused on unread and then route to Messages, unread groups are on top of messages</Text>
+          <Text mt={1}>- Nickname does not clip in the notebook posts previews if it is too long</Text>
           <Text mt={1}></Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>

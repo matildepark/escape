@@ -5,7 +5,7 @@ import useDocketState from '~/logic/state/docket';
 import { SidebarItemBase } from './SidebarItem';
 import { getAppHref } from '../Apps/AppTile';
 
-export const EXCLUDED_DESKS = ['landscape', 'garden', 'webterm', 'bitcoin', 'escape'];
+export const EXCLUDED_DESKS = ['landscape', 'garden', 'escape'];
 
 interface MyAppsProps {
   baseUrl: string;
