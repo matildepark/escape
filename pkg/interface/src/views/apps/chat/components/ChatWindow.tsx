@@ -27,6 +27,7 @@ type ChatWindowProps = {
   onLike: (msg: Post) => void;
   onBookmark: (msg: Post, permalink: string, collection: LinkCollection, add: boolean) => void;
   dismissUnread: () => void;
+  getMostRecent: () => void;
   pendingSize?: number;
   showOurContact: boolean;
   getPermalink: (index: BigInteger) => string | undefined;
@@ -215,6 +216,12 @@ class ChatWindow extends Component<
     this.setState({ isAtEnd: scrollTop < 80 });
   }
 
+  scrollToEnd = () => {
+    this.props.getMostRecent();
+    const [last] = this.props.graph.peekLargest();
+    this.virtualList!.scrollToIndex(last);
+  }
+
   renderer = React.forwardRef(({ index, scrollWindow }: RendererProps, ref) => {
     const {
       showOurContact,
@@ -306,7 +313,7 @@ class ChatWindow extends Component<
          />)}
         {!this.state.isAtEnd && (
           <Box position="absolute" bottom="12px" right="12px" zIndex={1}>
-            <Button onClick={() => this.virtualList?.resetScroll()} cursor='pointer'>
+            <Button onClick={this.scrollToEnd} cursor='pointer'>
               <Icon icon="ChevronSouth" />
             </Button>
           </Box>

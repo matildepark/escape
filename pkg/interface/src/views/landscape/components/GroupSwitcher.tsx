@@ -126,6 +126,7 @@ if (changingSort) {
       borderBottom='1px solid'
       borderRight="1px solid"
       borderColor='lightGray'
+      borderTopLeftRadius={4}
     >
       <Row alignItems="center" cursor='pointer' onClick={toggleChangingSort}>
         <Icon icon="ArrowWest" size="20px" ml="-8px" mr={2} />
@@ -184,6 +185,7 @@ return (
     borderBottom='1px solid'
     borderRight="1px solid"
     borderColor='lightGray'
+    borderTopLeftRadius={4}
   >
     <Col
       bg="white"

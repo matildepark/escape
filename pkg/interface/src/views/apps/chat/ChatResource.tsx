@@ -120,6 +120,12 @@ const ChatResource = (props: ChatResourceProps): ReactElement => {
     path
   })), [associations, association, isAdmin]);
 
+  const getMostRecent = useCallback(() => {
+    const { ship, name } = resourceFromPath(resource);
+    const count = Math.min(400, 100 + unreadCount);
+    getNewest(ship, name, count);
+  }, [resource, unreadCount]);
+
   const fetchMessages = useCallback(async (newer: boolean) => {
     const pageSize = 100;
 
@@ -229,7 +235,8 @@ const ChatResource = (props: ChatResourceProps): ReactElement => {
         isAdmin,
         group,
         association,
-        collections
+        collections,
+        getMostRecent
       }}
     />
   );

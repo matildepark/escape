@@ -155,14 +155,19 @@ export const PalsProfileInfo = ({
         </Row>
       )}
       {((isMutual || isLeech) && tags.length < 4) && (
-        <Box mt={1}>
+        <Box mt={1}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
           <Formik
             validationSchema={formSchema}
             initialValues={{ tag: '' }}
             onSubmit={onSubmitTag}
           >
             <Form style={{ display: 'contents' }}>
-              <Row flexShrink={0} flexDirection={['column-reverse', 'row']} gapX={2} justifyContent='space-between'>
+              <Row flexShrink={0} flexDirection='column' gapX={2} justifyContent='space-between'>
                 <Input maxWidth='24rem' width='100%' placeholder="Add pals tag" id="tag" />
                 <Button>Add</Button>
               </Row>

@@ -19,6 +19,7 @@ import { Portal } from './Portal';
 import { ProfileStatus } from './ProfileStatus';
 import RichText from './RichText';
 import { PalsProfileInfo } from './Pals/PalsProfileInfo';
+import { isMobile } from '../apps/chat/components/ChatEditor';
 
 export const OVERLAY_HEIGHT = 250;
 const FixedOverlay = styled(Col)`
@@ -77,7 +78,7 @@ const ProfileOverlay = (props: ProfileOverlayProps) => {
   }, [_setOpen]);
 
   useEffect(() => {
-    if(!visible) {
+    if (!visible && !isMobile) {
       setClosed();
     }
   }, [visible]);
@@ -220,6 +221,17 @@ const ProfileOverlay = (props: ProfileOverlayProps) => {
           </>
         )}
       </FixedOverlay>
+      {isMobile && (
+        <Box
+          position="fixed"
+          top="0"
+          bottom="0"
+          left="0"
+          right="0"
+          zIndex={0}
+          onClick={setClosed}
+        />
+      )}
     </Portal>
     )}
   </Box>

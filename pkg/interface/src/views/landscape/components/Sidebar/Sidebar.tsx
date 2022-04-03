@@ -1,7 +1,7 @@
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Box, Button, Col, Row } from '@tlon/indigo-react';
-import { FaFolder, FaFolderOpen } from 'react-icons/fa';
+import { FaFolder, FaFolderOpen, FaCheckCircle } from 'react-icons/fa';
 
 import { roleForShip } from '~/logic/lib/group';
 import { IS_MOBILE, IS_SHORT_SCREEN } from '~/logic/lib/platform';
@@ -10,6 +10,7 @@ import useGroupState from '~/logic/state/group';
 import useSettingsState from '~/logic/state/settings';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 import { useDark } from '~/logic/state/join';
+import useHarkState from '~/logic/state/hark';
 import { Workspace } from '~/types';
 import { getNavbarHeight } from '~/views/components/navigation/MobileNavbar';
 import { GroupSwitcher } from '../GroupSwitcher';
@@ -37,6 +38,7 @@ interface SidebarProps {
 export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarProps): ReactElement | null {
   const dark = useDark();
   const groupPath = getGroupFromWorkspace(workspace);
+  const { unreads, readCount } = useHarkState.getState();
   const [changingSort, setChangingSort] = useState(false);
   const { groupSorter, putEntry } = useSettingsState.getState();
   const [groupOrder, setGroupOrder] = useState<GroupOrder>(JSON.parse(groupSorter.order || '[]'));
@@ -64,6 +66,16 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
       groupOrder.map(go => (go && typeof go !== 'string') ? ({ ...go, collapsed }) : (go))
     );
 
+  const markAllRead = useCallback(() => {
+    if (confirm('Are you sure you want to clear all unread indicators?')) {
+      Object.keys(unreads).forEach((key) => {
+        if (unreads[key].count) {
+          readCount(key);
+        }
+      });
+    }
+  }, [unreads, readCount]);
+
   const groups = useGroupState(state => state.groups);
   const navbarHeight = getNavbarHeight();
   const isSmallScreen = IS_MOBILE || IS_SHORT_SCREEN;
@@ -78,14 +90,14 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
     groupsHeight = `calc(100% - ${(IS_SHORT_SCREEN ? 0 : navbarHeight) + HEADER_HEIGHT}px)`;
   } else if (focusMessages) {
     groupsHeight = `calc(50% - ${HEADER_HEIGHT / 2}px)`;
-    messagesHeight = `calc(50% - ${HEADER_HEIGHT / 2}px)`;
+    messagesHeight = `calc(50% - ${FOLDER_FOCUS_HEIGHT / 8 - 1}px)`;
   } else if (changingSort || showOnlyUnread) {
     groupsHeight = `calc(100% - ${HEADER_HEIGHT}px)`;
   }
 
   const groupListProps = { selected, baseUrl, changingSort, groupOrder, saveGroupOrder, showOnlyUnread };
   // const selectorIconProps = { p: 2, cursor: 'pointer', size: 20 };
-  const folderIconStyle = { height: '14px', width: '18px', padding: '2px', marginRight: '12px', cursor: 'pointer', color: dark ? 'white' : 'black' };
+  const folderIconStyle = { height: 14, width: 18, padding: 2, marginRight: 12, cursor: 'pointer', color: dark ? 'white' : 'black' };
   const smallButtonProps = { fontSize: '13px', py: 0, px: 2, height: '24px' };
 
   const showGroups = !isSmallScreen || !focusMessages || (showOnlyUnread && !focusMessages);
@@ -108,6 +120,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
           <Row alignItems="center">
             <FaFolder style={folderIconStyle} onClick={() => collapseAllFolders(true)} />
             <FaFolderOpen style={folderIconStyle} onClick={() => collapseAllFolders(false)} />
+            <FaCheckCircle style={{ ...folderIconStyle, height: 16, width: 16 }} onClick={markAllRead} />
           </Row>
           {!showOnlyUnread && <Button {...smallButtonProps} onClick={() => setShowOnlyUnread(true)}>Focus Unread</Button>}
           {showOnlyUnread && <Button {...smallButtonProps} onClick={() => setShowOnlyUnread(false)}>Show All</Button>}
@@ -119,7 +132,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
           width="100%"
           gridRow="1/2"
           gridColumn="1/2"
-          borderTopLeftRadius={2}
+          borderTopLeftRadius={4}
           borderRight={1}
           borderRightColor="lightGray"
           overflowY="scroll"
@@ -146,6 +159,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
           fontSize={0}
           position={IS_MOBILE ? 'absolute' : 'relative'}
           height={messagesHeight}
+          borderBottomLeftRadius={4}
         >
           <SidebarGroupList {...groupListProps} messages />
         </ScrollbarLessCol>

@@ -20,12 +20,11 @@ export default function InfoScreen(props: any): ReactElement {
           <H2>EScape Info</H2>
           <H3 mt={4}>What&apos;s in v{version}</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
-          <Text mt={1}>- Option (on desktop) to fullscreen the app pane</Text>
+          <Text mt={1}>- Option to clear all unread</Text>
           <Text mt={1}></Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
-          <Text mt={1}>- Truncate moon & comet names in likes</Text>
-          <Text mt={1}>- (mobile) When focused on unread and then route to Messages, unread groups are on top of messages</Text>
-          <Text mt={1}>- Nickname does not clip in the notebook posts previews if it is too long</Text>
+          <Text mt={1}>- iOS clicking on the pals tag input closes modal</Text>
+          <Text mt={1}>- “go to bottom” button should go to the last message</Text>
           <Text mt={1}></Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>

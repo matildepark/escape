@@ -33,7 +33,7 @@ const StoreDebugger = (props: StoreDebuggerProps) => {
     try {
       output =  _.get(state, filterToTry, undefined);
     } catch (e) {
-      console.log('filter failed');
+      console.warn('filter failed');
     }
     if (output) {
       console.log(output);

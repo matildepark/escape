@@ -22,7 +22,7 @@ export async function bootstrapApi(reset = false) {
 
   airlock.onError = async (err) => {
     airlock.reset();
-    console.log('AIRLOCK ERROR', err);
+    console.warn('AIRLOCK ERROR', err);
     await bootstrapApi();
   };
 

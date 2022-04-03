@@ -88,7 +88,7 @@ export function Notification(props: {
     if(redirect) {
       history.push(redirect);
     } else {
-      console.log('no redirect');
+      console.warn('no redirect');
     }
   };
 

@@ -44,6 +44,7 @@ interface ChatPaneProps {
   onReply: (msg: Post) => string;
   onDelete?: (msg: Post) => void;
   onLike?: (msg: Post) => void;
+  getMostRecent?: () => void;
   onBookmark?: (msg: Post, permalink: string, collection: LinkCollection, add: boolean) => void;
   /**
    * Fetch more messages
@@ -98,6 +99,7 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
     onLike,
     onBookmark,
     fetchMessages,
+    getMostRecent = () => null,
     promptShare = [],
     collections = []
   } = props;
@@ -151,7 +153,7 @@ export function ChatPane(props: ChatPaneProps): ReactElement {
         showOurContact={promptShare.length === 0 && !showBanner}
         pendingSize={Object.keys(graphTimesentMap).length}
         scrollTo={scrollTo ? bigInt(scrollTo) : undefined}
-        {...{ graph, unreadCount, onReply, onDelete, onLike, onBookmark, dismissUnread, fetchMessages, isAdmin, getPermalink, collections, inputRef, reply }}
+        {...{ graph, unreadCount, onReply, onDelete, onLike, onBookmark, dismissUnread, fetchMessages, isAdmin, getPermalink, collections, inputRef, reply, getMostRecent }}
       />
       {canWrite && (
         <ChatInput
