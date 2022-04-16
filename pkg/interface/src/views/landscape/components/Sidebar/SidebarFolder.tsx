@@ -10,6 +10,7 @@ import { getGraphUnreads } from '~/views/apps/launch/components/Groups';
 import { GroupFolder } from './SidebarGroupSorter';
 import { SidebarItemBase } from './SidebarItem';
 import { getHasNotification, SidebarGroup } from './SidebarGroup';
+import { MyApps } from './MyApps';
 
 interface SidebarFolderProps {
   baseUrl: string;
@@ -85,6 +86,8 @@ export const SidebarFolder = ({
           {folder.groups.map((group) => {
             if (group === 'My Channels') {
               return <SidebarGroup key={group} {...props} workspace={{ type: 'home' }} />;
+            } else if (group === 'My Apps') {
+              return <MyApps {...props} />;
             }
 
             const g = associations.groups[group];

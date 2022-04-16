@@ -1,4 +1,3 @@
-import { readGroup } from '@urbit/api';
 import _ from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import Helmet from 'react-helmet';

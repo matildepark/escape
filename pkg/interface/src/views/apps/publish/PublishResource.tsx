@@ -26,8 +26,12 @@ export function PublishResource(props: PublishResourceProps) {
     scrollRef.current.scrollTop = 0;
   }, [location]);
 
+  const focusScroll = () => {
+    scrollRef?.current?.focus();
+  };
+
   return (
-    <Box ref={scrollRef} height="100%" width="100%" overflowY="auto">
+    <Box tabIndex={0} ref={scrollRef} height="100%" width="100%" overflowY="auto" onMouseEnter={focusScroll}>
       <NotebookRoutes
         ship={ship}
         book={book}

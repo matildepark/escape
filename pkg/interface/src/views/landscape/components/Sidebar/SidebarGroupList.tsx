@@ -216,6 +216,7 @@ export function SidebarGroupList({
         return null;
       }) : (
         <>
+          <MyApps {...props} />
           <SidebarGroup {...props} workspace={{ type: 'home' }} />
           {groupList.map((g: any) => (
             <SidebarGroup

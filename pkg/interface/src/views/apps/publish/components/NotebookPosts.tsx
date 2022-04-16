@@ -1,6 +1,6 @@
+import React from 'react';
 import { Col } from '@tlon/indigo-react';
 import { Graph, Group } from '@urbit/api';
-import React from 'react';
 import { NotePreview } from './NotePreview';
 
 interface NotebookPostsProps {

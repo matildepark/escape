@@ -1,24 +1,14 @@
-import {
-    Col,
-    ErrorLabel, Icon, Label,
-
-    Row, Text
-} from '@tlon/indigo-react';
+import { Col, ErrorLabel, Icon, Label, Row, Text } from '@tlon/indigo-react';
 import { Groups, Rolodex } from '@urbit/api';
 import { FieldArray, useFormikContext } from 'formik';
 import _ from 'lodash';
-import React, {
-    ChangeEvent,
-
-    ReactElement, useCallback, useMemo,
-
-    useRef
-} from 'react';
+import React, { ChangeEvent, ReactElement, useCallback, useMemo, useRef } from 'react';
 import ob from 'urbit-ob';
 import * as Yup from 'yup';
 import { cite, deSig } from '~/logic/lib/util';
 import useContactState from '~/logic/state/contact';
 import useGroupState from '~/logic/state/group';
+import usePalsState from '~/logic/state/pals';
 import { DropdownSearch } from './DropdownSearch';
 import { HoverBox } from './HoverBox';
 
@@ -30,6 +20,7 @@ interface InviteSearchProps<I extends string> {
   id: I;
   hideSelection?: boolean;
   maxLength?: number;
+  excluded?: string[];
 }
 
 const getNicknameForShips = (groups: Groups, contacts: Rolodex, selected: string[]): readonly [string[], Map<string, string[]>] => {
@@ -78,6 +69,7 @@ const Candidate = ({ title, detail, selected, onClick }): ReactElement => (
     cursor="pointer"
     p={1}
     width="100%"
+    open={false}
   >
     <Text fontFamily="mono">{cite(title)}</Text>
     <Text maxWidth="50%">{detail}</Text>
@@ -102,10 +94,9 @@ export const shipSearchSchemaInGroup = (members: string[]) =>
 export function ShipSearch<I extends string, V extends Value<I>>(
   props: InviteSearchProps<I>
 ): ReactElement {
-  const { id, label, caption } = props;
+  const { id, label, caption, excluded = [] } = props;
   const {
     values,
-    touched,
     errors,
     initialValues,
     setFieldValue
@@ -121,6 +112,8 @@ export function ShipSearch<I extends string, V extends Value<I>>(
 
   const contacts = useContactState(state => state.contacts);
   const groups = useGroupState(state => state.groups);
+  const { pals } = usePalsState();
+  const palsList = Object.keys(pals.outgoing).filter(p => !excluded.includes(p));
 
   const [peers, nicknames] = useMemo(
     () => getNicknameForShips(groups, contacts, selected),
@@ -202,9 +195,11 @@ export function ShipSearch<I extends string, V extends Value<I>>(
               onChange={onChange}
               onSelect={onAdd}
             />
+
             <Row minHeight="34px" flexWrap="wrap">
               {pills.map((s, i) => (
                 <Row
+                  key={s}
                   fontFamily="mono"
                   alignItems="center"
                   py={1}
@@ -229,6 +224,18 @@ export function ShipSearch<I extends string, V extends Value<I>>(
             <ErrorLabel mt={3} hasError={error.length > 0}>
               {error.join(', ')}
             </ErrorLabel>
+            {palsList.length > 0 && (
+              <>
+                <Label mt={2}>Your pals</Label>
+                <Col overflow="hidden" overflowY="scroll" mt={2} height="60px">
+                  {palsList.map(p => (
+                    <HoverBox key={p} padding="2px 4px" cursor="pointer" onClick={() => onAdd(p)} bg="white" bgActive="washedGray" selected={false} open={false}>
+                      <Text>{p}</Text>
+                    </HoverBox>
+                  ))}
+                </Col>
+              </>
+            )}
           </Col>
         );
       }}

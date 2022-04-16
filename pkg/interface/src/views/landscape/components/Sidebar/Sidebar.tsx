@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Box, Button, Col, Row } from '@tlon/indigo-react';
 import { FaFolder, FaFolderOpen, FaCheckCircle } from 'react-icons/fa';
 
+import airlock from '~/logic/api';
 import { roleForShip } from '~/logic/lib/group';
 import { IS_MOBILE, IS_SHORT_SCREEN } from '~/logic/lib/platform';
 import { getGroupFromWorkspace } from '~/logic/lib/workspace';
@@ -10,12 +11,14 @@ import useGroupState from '~/logic/state/group';
 import useSettingsState from '~/logic/state/settings';
 import { useLocalStorageState } from '~/logic/lib/useLocalStorageState';
 import { useDark } from '~/logic/state/join';
-import useHarkState from '~/logic/state/hark';
+import useHarkState, { selHarkGraph } from '~/logic/state/hark';
+import useMetadataState from '~/logic/state/metadata';
 import { Workspace } from '~/types';
 import { getNavbarHeight } from '~/views/components/navigation/MobileNavbar';
 import { GroupSwitcher } from '../GroupSwitcher';
 import { SidebarGroupList } from './SidebarGroupList';
 import { GroupOrder } from './SidebarGroupSorter';
+import { markEachAsRead } from '@urbit/api';
 
 export const FOLDER_FOCUS_HEIGHT = 40;
 export const HEADER_HEIGHT = 50 + FOLDER_FOCUS_HEIGHT;
@@ -37,8 +40,10 @@ interface SidebarProps {
 
 export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarProps): ReactElement | null {
   const dark = useDark();
+  const { associations } = useMetadataState();
   const groupPath = getGroupFromWorkspace(workspace);
-  const { unreads, readCount } = useHarkState.getState();
+  const harkState = useHarkState.getState();
+  const { unreads, readCount } = harkState;
   const [changingSort, setChangingSort] = useState(false);
   const { groupSorter, putEntry } = useSettingsState.getState();
   const [groupOrder, setGroupOrder] = useState<GroupOrder>(JSON.parse(groupSorter.order || '[]'));
@@ -68,13 +73,28 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
 
   const markAllRead = useCallback(() => {
     if (confirm('Are you sure you want to clear all unread indicators?')) {
+      Object.values(associations.graph).forEach(({ resource, metadata }) => {
+        if (metadata.config.graph === 'publish') {
+          harkState.readGraph(resource);
+        } else if (metadata.config.graph === 'link') {
+          const unreads = selHarkGraph(resource)(harkState);
+          const [,,ship,name] = resource.split('/');
+          unreads.each.forEach((u) => {
+            airlock.poke(markEachAsRead({
+              desk: (window as any).desk,
+              path: `/graph/${ship}/${name}`
+            }, u));
+          });
+        }
+      });
+
       Object.keys(unreads).forEach((key) => {
         if (unreads[key].count) {
           readCount(key);
         }
       });
     }
-  }, [unreads, readCount]);
+  }, [unreads, harkState, readCount]);
 
   const groups = useGroupState(state => state.groups);
   const navbarHeight = getNavbarHeight();
@@ -91,8 +111,10 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
   } else if (focusMessages) {
     groupsHeight = `calc(50% - ${HEADER_HEIGHT / 2}px)`;
     messagesHeight = `calc(50% - ${FOLDER_FOCUS_HEIGHT / 8 - 1}px)`;
-  } else if (changingSort || showOnlyUnread) {
+  } else if (showOnlyUnread) {
     groupsHeight = `calc(100% - ${HEADER_HEIGHT}px)`;
+  } else if (changingSort) {
+    groupsHeight = `calc(100% - ${HEADER_HEIGHT - FOLDER_FOCUS_HEIGHT - 3}px)`;
   }
 
   const groupListProps = { selected, baseUrl, changingSort, groupOrder, saveGroupOrder, showOnlyUnread };
@@ -115,7 +137,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
         groupOrder={groupOrder}
         saveGroupOrder={saveGroupOrder}
       />
-      {!focusMessages && (
+      {(!focusMessages && !changingSort) && (
         <Row alignItems="center" justifyContent="space-between" px="14px" py={2} borderRight={1} borderBottom={1} borderColor="lightGray" flexWrap="wrap">
           <Row alignItems="center">
             <FaFolder style={folderIconStyle} onClick={() => collapseAllFolders(true)} />

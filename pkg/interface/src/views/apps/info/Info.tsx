@@ -20,11 +20,14 @@ export default function InfoScreen(props: any): ReactElement {
           <H2>EScape Info</H2>
           <H3 mt={4}>What&apos;s in v{version}</H3>
           <Text fontWeight={600} mt={3} mb={2}>New:</Text>
-          <Text mt={1}>- Option to clear all unread</Text>
+          <Text mt={1}>- Hide Focus Unread and icon bar when sorting</Text>
+          <Text mt={1}>- Show an instructional error message if click {'"refresh"'} while in a channel</Text>
+          <Text mt={1}>- Hovering over contents of a notebook selection should allow arrow key scroll</Text>
+          <Text mt={1}>- Show pals list in ship search component</Text>
           <Text mt={1}></Text>
           <Text fontWeight={600} mt={3} mb={2}>Fixes:</Text>
-          <Text mt={1}>- iOS clicking on the pals tag input closes modal</Text>
-          <Text mt={1}>- “go to bottom” button should go to the last message</Text>
+          <Text mt={1}>- My Apps not showing up on fresh install</Text>
+          <Text mt={1}>- Clear notifications button should clear collection and notebook notifications</Text>
           <Text mt={1}></Text>
           <H3 mt={4}>Chat Features</H3>
           <Text fontWeight={600} mt={3} mb={2}>Hover Options:</Text>

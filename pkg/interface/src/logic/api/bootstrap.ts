@@ -16,6 +16,7 @@ export async function bootstrapApi(reset = false) {
 
     const isResourceView = window.location.href.match(/\/resource\/[a-z]*?\/ship\//);
     if (isResourceView) {
+      alert('You cannot refresh from within a channel, please navigate away and try again.');
       return;
     }
   }

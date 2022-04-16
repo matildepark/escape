@@ -4,5 +4,6 @@ declare global {
   interface Window {
     ship: PatpNoSig;
     desk: string;
+    isMobileApp: boolean;
   }
 }
