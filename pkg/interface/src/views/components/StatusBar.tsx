@@ -30,7 +30,11 @@ const StatusBar = (props) => {
   const isHome = props.location.pathname === '/';
 
   const refreshConnections = useCallback(() => {
-    bootstrapApi(true);
+    if (window.location.href.match(/\/resource\/[a-z]*?\/ship\//)) {
+      alert('You cannot refresh from within a channel, please navigate away and try again.');
+    } else {
+      bootstrapApi(true);
+    }
   }, []);
 
   let title = `~${window.ship}`;
