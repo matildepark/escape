@@ -52,8 +52,8 @@ export function InvitePopover(props: InvitePopoverProps) {
   }, [history.push, props.baseUrl]);
   useOutsideClick(innerRef, onOutsideClick);
 
-  const group = groups[association.group];
-  const members = Array.from(group.members);
+  const group = groups[association?.group];
+  const members = Array.from(group?.members || []);
 
   const onSubmit = async ({ ships, description }: FormSchema, actions) => {
     //  TODO: how to invite via email?
