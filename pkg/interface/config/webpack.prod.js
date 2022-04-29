@@ -56,6 +56,10 @@ module.exports = {
         ]
       },
       {
+        test: /\.json$/,
+        use: 'json-loader'
+      },
+      {
         test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
         loader: require.resolve('url-loader'),
           options: {
