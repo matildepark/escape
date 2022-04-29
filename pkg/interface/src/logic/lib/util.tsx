@@ -280,9 +280,9 @@ export function writeText(str: string | null): Promise<void> {
 export const citeNickname = (ship: string, showNickname?: boolean, nickname?: string) => {
   if (showNickname) {
     if (ship.length === 27) {
-      return <>{nickname} {cite(ship)}</>;
+      return <>{nickname} <Text mono gray>{cite(ship)}</Text></>;
     } else {
-      return `${nickname} ${cite(ship)}`;
+      return <>{nickname} <Text mono gray>{cite(ship)}</Text></>;
     }
   }
 
