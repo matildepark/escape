@@ -53,13 +53,16 @@ export interface SettingsState {
   leap: {
     categories: LeapCategories[];
   };
-  bookmarks: { [key: string]: string },
-  groupSorter: { order: string },
-  pushNotifications: { pushNotificationDetails: boolean }
+  bookmarks: { [key: string]: string };
+  groupSorter: { order: string };
+  pushNotifications: { pushNotificationDetails: boolean };
 }
 
-export const selectSettingsState = <K extends keyof (SettingsState & BaseState<SettingsState>)>(keys: K[]) =>
-  f.pick<BaseState<SettingsState> & SettingsState, K>(keys);
+export const selectSettingsState = <
+  K extends keyof (SettingsState & BaseState<SettingsState>)
+>(
+  keys: K[]
+) => f.pick<BaseState<SettingsState> & SettingsState, K>(keys);
 
 export const selectCalmState = (s: SettingsState) => s.calm;
 
@@ -112,9 +115,11 @@ const useSettingsState = createState<SettingsState>(
       pushNotificationDetails: false
     },
     getAll: async () => {
-      const { desk } = await airlock.scry(getDeskSettings((window as any).desk));
+      const { desk } = await airlock.scry(
+        getDeskSettings((window as any).desk)
+      );
       get().set((s) => {
-        for(const bucket in desk) {
+        for (const bucket in desk) {
           s[bucket] = { ...(s[bucket] || {}), ...desk[bucket] };
         }
       });
@@ -127,12 +132,16 @@ const useSettingsState = createState<SettingsState>(
   [],
   [
     (set, get) =>
-      createSubscription('settings-store', `/desk/${(window as any).desk}`, (e) => {
-        const data = _.get(e, 'settings-event', false);
-        if (data) {
-          reduceStateN(get(), data, reduceUpdate);
+      createSubscription(
+        'settings-store',
+        `/desk/${(window as any).desk}`,
+        (e) => {
+          const data = _.get(e, 'settings-event', false);
+          if (data) {
+            reduceStateN(get(), data, reduceUpdate);
+          }
         }
-      })
+      )
   ]
 );
 
@@ -151,7 +160,10 @@ export function useTheme() {
 }
 
 // Hide is an optional second parameter for when this function is used in class components
-export function useShowNickname(contact: Contact | null, hide?: boolean): boolean {
+export function useShowNickname(
+  contact: Contact | null,
+  hide?: boolean
+): boolean {
   const hideState = useSettingsState(state => state.calm.hideNicknames);
   const hideNicknames = typeof hide !== 'undefined' ? hide : hideState;
   return Boolean(contact && contact.nickname && !hideNicknames);

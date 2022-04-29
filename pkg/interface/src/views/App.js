@@ -1,49 +1,50 @@
-import dark from "@tlon/indigo-dark";
-import light from "@tlon/indigo-light";
-import Mousetrap from "mousetrap";
-import shallow from "zustand/shallow";
-import "mousetrap-global-bind";
-import * as React from "react";
-import Helmet from "react-helmet";
-import "react-hot-loader";
-import { hot } from "react-hot-loader/root";
-import { BrowserRouter as Router, withRouter } from "react-router-dom";
-import styled, { ThemeProvider } from "styled-components";
-import gcpManager from "~/logic/lib/gcpManager";
-import { svgDataURL } from "~/logic/lib/util";
-import withState from "~/logic/lib/withState";
-import useContactState, { favicon } from "~/logic/state/contact";
-import useLocalState from "~/logic/state/local";
-import useSettingsState from "~/logic/state/settings";
-import useGraphState from "~/logic/state/graph";
-import { ShortcutContextProvider } from "~/logic/lib/shortcutContext";
-import { IS_MOBILE } from "~/logic/lib/platform";
-import chroma from "chroma-js";
+import dark from '@tlon/indigo-dark';
+import light from '@tlon/indigo-light';
+import Mousetrap from 'mousetrap';
+import shallow from 'zustand/shallow';
+import 'mousetrap-global-bind';
+import * as React from 'react';
+import Helmet from 'react-helmet';
+import 'react-hot-loader';
+import { hot } from 'react-hot-loader/root';
+import { BrowserRouter as Router, withRouter } from 'react-router-dom';
+import styled, { ThemeProvider } from 'styled-components';
+import gcpManager from '~/logic/lib/gcpManager';
+import { svgDataURL } from '~/logic/lib/util';
+import withState from '~/logic/lib/withState';
+import useContactState, { favicon } from '~/logic/state/contact';
+import useLocalState from '~/logic/state/local';
+import useSettingsState from '~/logic/state/settings';
+import useGraphState from '~/logic/state/graph';
+import { ShortcutContextProvider } from '~/logic/lib/shortcutContext';
+import { IS_MOBILE } from '~/logic/lib/platform';
+import chroma from 'chroma-js';
 
-import ErrorBoundary from "~/views/components/ErrorBoundary";
-import { MobileNavbar } from "~/views/components/navigation/MobileNavbar";
-import "./apps/chat/css/custom.css";
-import Omnibox from "./components/leap/Omnibox";
-import StatusBar from "./components/StatusBar";
-import "./css/fonts.css";
-import "./css/indigo-static.css";
-import { Content } from "./landscape/components/Content";
-import "./landscape/css/custom.css";
-import { bootstrapApi } from "~/logic/api/bootstrap";
-import { uxToHex } from "@urbit/api";
+import ErrorBoundary from '~/views/components/ErrorBoundary';
+import { MobileNavbar } from '~/views/components/navigation/MobileNavbar';
+import './apps/chat/css/custom.css';
+import Omnibox from './components/leap/Omnibox';
+import StatusBar from './components/StatusBar';
+import './css/fonts.css';
+import './css/indigo-static.css';
+import { Content } from './landscape/components/Content';
+import './landscape/css/custom.css';
+import { bootstrapApi } from '~/logic/api/bootstrap';
+import { uxToHex } from '@urbit/api';
 
 function ensureValidHex(color) {
-  if (!color) return "#000000";
+  if (!color)
+return '#000000';
 
-  const isUx = color.startsWith("0x");
+  const isUx = color.startsWith('0x');
   const parsedColor = isUx ? uxToHex(color) : color;
 
-  return parsedColor.startsWith("#") ? parsedColor : `#${parsedColor}`;
+  return parsedColor.startsWith('#') ? parsedColor : `#${parsedColor}`;
 }
 
 const Root = withState(
   styled.div`
-    font-family: ${(p) => p.theme.fonts.sans};
+    font-family: ${p => p.theme.fonts.sans};
     height: 100%;
     width: 100%;
     padding-left: env(safe-area-inset-left, 0px);
@@ -52,13 +53,13 @@ const Root = withState(
     padding-bottom: env(safe-area-inset-bottom, 0px);
 
     margin: 0;
-    ${(p) =>
-      p.display.backgroundType === "url"
+    ${p =>
+      p.display.backgroundType === 'url'
         ? `
     background-image: url('${p.display.background}');
     background-size: cover;
     `
-        : p.display.backgroundType === "color"
+        : p.display.backgroundType === 'color'
         ? `
     background-color: ${ensureValidHex(p.display.background)};
     `
@@ -69,7 +70,7 @@ const Root = withState(
 
     * {
       scrollbar-width: thin;
-      scrollbar-color: ${(p) => p.theme.colors.gray} transparent;
+      scrollbar-color: ${p => p.theme.colors.gray} transparent;
     }
 
     /* Works on Chrome/Edge/Safari */
@@ -81,12 +82,12 @@ const Root = withState(
       background: transparent;
     }
     *::-webkit-scrollbar-thumb {
-      background-color: ${(p) => p.theme.colors.gray};
+      background-color: ${p => p.theme.colors.gray};
       border-radius: 1rem;
       border: 0px solid transparent;
     }
   `,
-  [[useSettingsState, ["display"]]]
+  [[useSettingsState, ['display']]]
 );
 
 const StatusBarWithRouter = withRouter(StatusBar);
@@ -101,12 +102,12 @@ class App extends React.Component {
 
   componentDidMount() {
     bootstrapApi();
-    this.props.getShallowChildren(`~${window.ship}`, "dm-inbox");
+    this.props.getShallowChildren(`~${window.ship}`, 'dm-inbox');
     const theme = this.getTheme();
     setTimeout(() => {
       // Something about how the store works doesn't like changing it
       // before the app has actually rendered, hence the timeout.
-      this.themeWatcher = window.matchMedia("(prefers-color-scheme: dark)");
+      this.themeWatcher = window.matchMedia('(prefers-color-scheme: dark)');
       this.mobileWatcher = window.matchMedia(
         `(max-width: ${theme.breakpoints[0]})`
       );
@@ -134,7 +135,7 @@ class App extends React.Component {
     }, 500);
     this.props.getAll();
     gcpManager.start();
-    Mousetrap.bindGlobal(["command+/", "ctrl+/"], (e) => {
+    Mousetrap.bindGlobal(['command+/', 'ctrl+/'], (e) => {
       e.preventDefault();
       e.stopImmediatePropagation();
       this.props.toggleOmnibox();
@@ -182,29 +183,29 @@ class App extends React.Component {
   getTheme() {
     const { props } = this;
     const { display } = props;
-    if (display.theme === "custom") {
+    if (display.theme === 'custom') {
       const clonedLight = Object.assign({}, light);
       clonedLight.fonts.sans = display.sans;
       clonedLight.colors.black = display.black;
-      clonedLight.colors.washedGray = `rgba(${chroma(display.black || "#000000")
+      clonedLight.colors.washedGray = `rgba(${chroma(display.black || '#000000')
         .alpha(0.25)
         .rgba()
         .toString()})`;
-      clonedLight.colors.lightGray = `rgba(${chroma(display.black || "#000000")
+      clonedLight.colors.lightGray = `rgba(${chroma(display.black || '#000000')
         .alpha(0.5)
         .rgba()
         .toString()})`;
-      clonedLight.colors.gray = `rgba(${chroma(display.black || "#000000")
+      clonedLight.colors.gray = `rgba(${chroma(display.black || '#000000')
         .alpha(0.75)
         .rgba()
         .toString()})`;
       clonedLight.colors.white = display.white;
-      clonedLight.borders = ["none", display.border];
+      clonedLight.borders = ['none', display.border];
       console.log(clonedLight);
       return clonedLight;
     }
-    return (props.dark && props?.display?.theme == "auto") ||
-      props?.display?.theme == "dark"
+    return (props.dark && props?.display?.theme == 'auto') ||
+      props?.display?.theme == 'dark'
       ? dark
       : light;
   }
@@ -233,7 +234,7 @@ class App extends React.Component {
                   <StatusBarWithRouter
                     props={this.props}
                     ourContact={ourContact}
-                    connection={"foo"}
+                    connection={'foo'}
                     subscription={this.subscription}
                     ship={this.ship}
                   />
@@ -249,7 +250,7 @@ class App extends React.Component {
                 <Content
                   ship={this.ship}
                   subscription={this.subscription}
-                  connection={"aa"}
+                  connection={'aa'}
                 />
               </ErrorBoundary>
               {IS_MOBILE && (
@@ -266,12 +267,12 @@ class App extends React.Component {
   }
 }
 const WarmApp =
-  process.env.NODE_ENV === "production" ? new App() : new hot(App);
+  process.env.NODE_ENV === 'production' ? new App() : new hot(App);
 
-const selContacts = (s) => s.contacts[`~${window.ship}`];
-const selLocal = (s) => [s.set, s.omniboxShown, s.toggleOmnibox, s.dark];
-const selSettings = (s) => [s.display, s.getAll];
-const selGraph = (s) => s.getShallowChildren;
+const selContacts = s => s.contacts[`~${window.ship}`];
+const selLocal = s => [s.set, s.omniboxShown, s.toggleOmnibox, s.dark];
+const selSettings = s => [s.display, s.getAll];
+const selGraph = s => s.getShallowChildren;
 
 const WithApp = React.forwardRef((props, ref) => {
   const ourContact = useContactState(selContacts);
