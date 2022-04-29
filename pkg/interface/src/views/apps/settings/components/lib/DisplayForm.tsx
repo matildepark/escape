@@ -153,30 +153,32 @@ export default function DisplayForm() {
           <Radio name="theme" id="custom" label="Custom" />
           {initialValues.theme === 'custom' && (
             <>
-              <Label>Font</Label>
+            <Col color="black" backgroundColor="washedGray" p={4} gapY={4} maxWidth="300px">
+              <Label bold>Font</Label>
               <Field
                 name="sans"
                 placeholder="Inter"
-                style={{ backgroundColor: 'transparent' }}
+                style={{ backgroundColor: 'transparent', color: 'inherit', padding: '1rem 0', border: '1px solid rgb(255,255,255,0.2)' }}
               />
-              <Label>Background</Label>
+              <Label bold>Background Color</Label>
               <Field
                 placeholder="rgba(255,255,255,1)"
                 name="white"
-                style={{ backgroundColor: 'transparent' }}
+                style={{ backgroundColor: 'transparent', color: 'inherit', border: '1px solid rgb(255,255,255,0.2)', padding: '1rem 0' }}
               />
-              <Label>Text</Label>
+              <Label bold>Text Color</Label>
               <Field
                 placeholder="rgba(0,0,0,1)"
                 name="black"
-                style={{ backgroundColor: 'transparent' }}
+                style={{ backgroundColor: 'transparent', color: 'inherit', border: '1px solid rgb(255,255,255,0.2)', padding: '1rem 0' }}
               />
-              <Label>Borders</Label>
+              <Label bold>Borders</Label>
               <Field
                 name="border"
                 placeholder="1px solid"
-                style={{ backgroundColor: 'transparent' }}
+                style={{ backgroundColor: 'transparent', color: 'inherit', border: '1px solid rgb(255,255,255,0.2)', padding: '1rem 0' }}
               />
+              </Col>
             </>
           )}
         </Col>
