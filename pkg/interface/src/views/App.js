@@ -188,16 +188,24 @@ class App extends React.Component {
       const valid = /^#[0-9A-F]{6}$/i;
       const clonedLight = cloneDeep(light);
       clonedLight.fonts.sans = display.sans;
-      clonedLight.colors.black = display.black;
-      clonedLight.colors.washedGray = `rgba(${chroma(valid.test(display.black) ? display.black : '#000000')
+      clonedLight.colors.black = valid.test(display.black)
+        ? display.black
+        : '#000000';
+      clonedLight.colors.washedGray = `rgba(${chroma(
+        valid.test(display.black) ? display.black : '#000000'
+      )
         .alpha(0.25)
         .rgba()
         .toString()})`;
-      clonedLight.colors.lightGray = `rgba(${chroma(valid.test(display.black) ? display.black : '#000000')
+      clonedLight.colors.lightGray = `rgba(${chroma(
+        valid.test(display.black) ? display.black : '#000000'
+      )
         .alpha(0.5)
         .rgba()
         .toString()})`;
-      clonedLight.colors.gray = `rgba(${chroma(valid.test(display.black) ? display.black : '#000000')
+      clonedLight.colors.gray = `rgba(${chroma(
+        valid.test(display.black) ? display.black : '#000000'
+      )
         .alpha(0.75)
         .rgba()
         .toString()})`;
@@ -267,8 +275,7 @@ class App extends React.Component {
     );
   }
 }
-const WarmApp =
-  process.env.NODE_ENV === 'production' ? new App() : hot(App);
+const WarmApp = process.env.NODE_ENV === 'production' ? new App() : hot(App);
 
 const selContacts = s => s.contacts[`~${window.ship}`];
 const selLocal = s => [s.set, s.omniboxShown, s.toggleOmnibox, s.dark];
