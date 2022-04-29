@@ -63,14 +63,14 @@ export function Note(props: NoteProps & RouteComponentProps) {
   if (window.ship === note?.post?.author) {
     adminLinks.push(
       <Link to={`${baseUrl}/edit`}>
-        <Action backgroundColor="white">Update</Action>
+        <Action backgroundColor="transparent">Update</Action>
       </Link>
     );
   }
 
   if (window.ship === note?.post?.author || ourRole === 'admin') {
     adminLinks.push(
-      <Action backgroundColor="white" destructive onClick={deletePost}>
+      <Action backgroundColor="transparent" destructive onClick={deletePost}>
         Delete
       </Action>
     );
