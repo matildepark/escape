@@ -161,7 +161,7 @@ return false;
         p={1}
         mb={1}
         ml="28px"
-        backgroundColor={highlighted ? 'washedBlue' : 'white'}
+        backgroundColor={highlighted ? 'washedBlue' : 'transparent'}
         transcluded={0}
         contents={post.contents}
         showOurContact
