@@ -182,8 +182,8 @@ return (
     position="sticky"
     top="0px"
     pl={3}
-    borderBottom='1px solid'
-    borderRight="1px solid"
+    borderBottom={1}
+    borderRight={1}
     borderColor='lightGray'
     borderTopLeftRadius={4}
   >
