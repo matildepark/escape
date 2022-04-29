@@ -119,7 +119,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
 
   const groupListProps = { selected, baseUrl, changingSort, groupOrder, saveGroupOrder, showOnlyUnread };
   // const selectorIconProps = { p: 2, cursor: 'pointer', size: 20 };
-  const folderIconStyle = { height: 14, width: 18, padding: 2, marginRight: 12, cursor: 'pointer', color: dark ? 'white' : 'black' };
+  const folderIconStyle = { height: 14, width: 18, padding: 2, marginRight: 12, cursor: 'pointer', color: 'inherit' };
   const smallButtonProps = { fontSize: '13px', py: 0, px: 2, height: '24px' };
 
   const showGroups = !isSmallScreen || !focusMessages || (showOnlyUnread && !focusMessages);
@@ -139,7 +139,7 @@ export function Sidebar({ baseUrl, selected, workspace, recentGroups }: SidebarP
       />
       {(!focusMessages && !changingSort) && (
         <Row alignItems="center" justifyContent="space-between" px="14px" py={2} borderRight={1} borderBottom={1} borderColor="lightGray" flexWrap="wrap">
-          <Row alignItems="center">
+          <Row alignItems="center" color="black">
             <FaFolder style={folderIconStyle} onClick={() => collapseAllFolders(true)} />
             <FaFolderOpen style={folderIconStyle} onClick={() => collapseAllFolders(false)} />
             <FaCheckCircle style={{ ...folderIconStyle, height: 16, width: 16 }} onClick={markAllRead} />
