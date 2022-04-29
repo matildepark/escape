@@ -193,7 +193,7 @@ export const LinkItem = React.forwardRef((props: LinkItemProps, ref: RefObject<H
 
             {(ourRole === 'admin' || node.post.author === window.ship) &&
               <Row alignItems="center" p={1}>
-                <Action bg="white" m={1} color="red" destructive onClick={deleteLink}>Delete Link</Action>
+                <Action bg="transparent" m={1} color="red" destructive onClick={deleteLink}>Delete Link</Action>
               </Row>
             }
           </Col>

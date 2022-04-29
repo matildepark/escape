@@ -10,8 +10,8 @@ const GIT_DESC = execSync('git describe --always', { encoding: 'utf8' }).trim();
 module.exports = {
   mode: 'production',
   entry: {
-     app: './src/index.js',
-     serviceworker: './src/serviceworker.js'
+    app: './src/index.js',
+    serviceworker: './src/serviceworker.js'
   },
   module: {
     rules: [
@@ -20,7 +20,11 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/typescript', '@babel/preset-react'],
+            presets: [
+              '@babel/preset-env',
+              '@babel/typescript',
+              '@babel/preset-react'
+            ],
             plugins: [
               'lodash',
               '@babel/transform-runtime',
@@ -56,9 +60,13 @@ module.exports = {
         ]
       },
       {
+        test: /\.json$/,
+        use: 'json-loader'
+      },
+      {
         test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
         loader: require.resolve('url-loader'),
-          options: {
+        options: {
           limit: 10000,
           name: 'static/media/[name].[hash:8].[ext]'
         }
@@ -84,7 +92,9 @@ module.exports = {
     new MomentLocalesPlugin(),
     new CleanWebpackPlugin(),
     new webpack.DefinePlugin({
-      'process.env.LANDSCAPE_STREAM': JSON.stringify(process.env.LANDSCAPE_STREAM),
+      'process.env.LANDSCAPE_STREAM': JSON.stringify(
+        process.env.LANDSCAPE_STREAM
+      ),
       'process.env.LANDSCAPE_SHORTHASH': JSON.stringify(GIT_DESC),
       'process.env.LANDSCAPE_STORAGE_VERSION': Date.now().toString(),
       'process.env.LANDSCAPE_LAST_WIPE': '2021-10-20'
@@ -97,7 +107,9 @@ module.exports = {
   ],
   output: {
     filename: (pathData) => {
-      return pathData.chunk.name === 'app' ? 'index.[contenthash].js' : '[name].js';
+      return pathData.chunk.name === 'app'
+        ? 'index.[contenthash].js'
+        : '[name].js';
     },
     path: path.resolve(__dirname, '../dist'),
     publicPath: '/apps/escape/'

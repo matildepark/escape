@@ -13,6 +13,7 @@ let devServer = {
   port: 9000,
   host: '0.0.0.0',
   disableHostCheck: true,
+  https: true,
   historyApiFallback: {
     index: '/apps/landscape/index.html',
     disableDotRule: true
@@ -20,9 +21,12 @@ let devServer = {
   publicPath: '/apps/escape/'
 };
 
-const router =  _.mapKeys(urbitrc.FLEET || {}, (value, key) => `${key}.localhost:9000`);
+const router = _.mapKeys(
+  urbitrc.FLEET || {},
+  (value, key) => `${key}.localhost:9000`
+);
 
-if(urbitrc.URL) {
+if (urbitrc.URL) {
   devServer = {
     ...devServer,
     // headers: {
@@ -32,7 +36,7 @@ if(urbitrc.URL) {
       {
         context: (path) => {
           console.log(path);
-          if(path === '/apps/escape/desk.js') {
+          if (path === '/apps/escape/desk.js') {
             return true;
           }
           return !path.startsWith('/apps/escape');
@@ -40,7 +44,7 @@ if(urbitrc.URL) {
         changeOrigin: true,
         target: urbitrc.URL,
         router
-     }
+      }
     ]
   };
 }
@@ -58,11 +62,18 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/typescript', ['@babel/preset-react', {
-              runtime: 'automatic',
-              development: true,
-              importSource: '@welldone-software/why-did-you-render'
-            }]],
+            presets: [
+              '@babel/preset-env',
+              '@babel/typescript',
+              [
+                '@babel/preset-react',
+                {
+                  runtime: 'automatic',
+                  development: true,
+                  importSource: '@welldone-software/why-did-you-render'
+                }
+              ]
+            ],
             plugins: [
               '@babel/transform-runtime',
               '@babel/plugin-proposal-object-rest-spread',
@@ -100,7 +111,7 @@ module.exports = {
       {
         test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
         loader: require.resolve('url-loader'),
-          options: {
+        options: {
           limit: 10000,
           name: 'static/media/[name].[hash:8].[ext]'
         }
@@ -113,7 +124,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.ts', '.tsx']
+    extensions: ['.js', '.ts', '.tsx', '.json']
   },
   devtool: 'inline-source-map',
   devServer: devServer,

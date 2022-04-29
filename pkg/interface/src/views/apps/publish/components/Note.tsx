@@ -63,14 +63,14 @@ export function Note(props: NoteProps & RouteComponentProps) {
   if (window.ship === note?.post?.author) {
     adminLinks.push(
       <Link to={`${baseUrl}/edit`}>
-        <Action backgroundColor="white">Update</Action>
+        <Action backgroundColor="transparent">Update</Action>
       </Link>
     );
   }
 
   if (window.ship === note?.post?.author || ourRole === 'admin') {
     adminLinks.push(
-      <Action backgroundColor="white" destructive onClick={deletePost}>
+      <Action backgroundColor="transparent" destructive onClick={deletePost}>
         Delete
       </Action>
     );
@@ -111,7 +111,7 @@ export function Note(props: NoteProps & RouteComponentProps) {
             maxNameWidth="225px"
           />
           <Row px={2} gapX={2} alignItems="flex-end" height="14px">
-            <Action bg="white" onClick={doCopy}>{copyDisplay}</Action>
+            <Action bg="transparent" onClick={doCopy}>{copyDisplay}</Action>
             {adminLinks}
           </Row>
         </Row>

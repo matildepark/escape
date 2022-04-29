@@ -18,6 +18,8 @@ import useSettingsState from '~/logic/state/settings';
 import useGraphState from '~/logic/state/graph';
 import { ShortcutContextProvider } from '~/logic/lib/shortcutContext';
 import { IS_MOBILE } from '~/logic/lib/platform';
+import chroma from 'chroma-js';
+import { cloneDeep } from 'lodash';
 
 import ErrorBoundary from '~/views/components/ErrorBoundary';
 import { MobileNavbar } from '~/views/components/navigation/MobileNavbar';
@@ -33,7 +35,7 @@ import { uxToHex } from '@urbit/api';
 
 function ensureValidHex(color) {
   if (!color)
-    return '#000000';
+return '#000000';
 
   const isUx = color.startsWith('0x');
   const parsedColor = isUx ? uxToHex(color) : color;
@@ -41,48 +43,53 @@ function ensureValidHex(color) {
   return parsedColor.startsWith('#') ? parsedColor : `#${parsedColor}`;
 }
 
-const Root = withState(styled.div`
-  font-family: ${p => p.theme.fonts.sans};
-  height: 100%;
-  width: 100%;
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  
-  margin: 0;
-  ${p => p.display.backgroundType === 'url' ? `
+const Root = withState(
+  styled.div`
+    font-family: ${p => p.theme.fonts.sans};
+    height: 100%;
+    width: 100%;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    margin: 0;
+    ${p =>
+      p.display.backgroundType === 'url'
+        ? `
     background-image: url('${p.display.background}');
     background-size: cover;
-    ` : p.display.backgroundType === 'color' ? `
+    `
+        : p.display.backgroundType === 'color'
+        ? `
     background-color: ${ensureValidHex(p.display.background)};
-    ` : `background-color: ${p.theme.colors.white};`
-  }
-  display: flex;
-  flex-flow: column nowrap;
-  touch-action: none;
+    `
+        : `background-color: ${p.theme.colors.white};`}
+    display: flex;
+    flex-flow: column nowrap;
+    touch-action: none;
 
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: ${ p => p.theme.colors.gray } transparent;
-  }
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: ${p => p.theme.colors.gray} transparent;
+    }
 
-  /* Works on Chrome/Edge/Safari */
-  *::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  *::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: ${ p => p.theme.colors.gray };
-    border-radius: 1rem;
-    border: 0px solid transparent;
-  }
-`, [
-  [useSettingsState, ['display']]
-]);
+    /* Works on Chrome/Edge/Safari */
+    *::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    *::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    *::-webkit-scrollbar-thumb {
+      background-color: ${p => p.theme.colors.gray};
+      border-radius: 1rem;
+      border: 0px solid transparent;
+    }
+  `,
+  [[useSettingsState, ['display']]]
+);
 
 const StatusBarWithRouter = withRouter(StatusBar);
 class App extends React.Component {
@@ -102,10 +109,18 @@ class App extends React.Component {
       // Something about how the store works doesn't like changing it
       // before the app has actually rendered, hence the timeout.
       this.themeWatcher = window.matchMedia('(prefers-color-scheme: dark)');
-      this.mobileWatcher = window.matchMedia(`(max-width: ${theme.breakpoints[0]})`);
-      this.smallWatcher = window.matchMedia(`(min-width: ${theme.breakpoints[0]})`);
-      this.mediumWatcher = window.matchMedia(`(min-width: ${theme.breakpoints[1]})`);
-      this.largeWatcher = window.matchMedia(`(min-width: ${theme.breakpoints[2]})`);
+      this.mobileWatcher = window.matchMedia(
+        `(max-width: ${theme.breakpoints[0]})`
+      );
+      this.smallWatcher = window.matchMedia(
+        `(min-width: ${theme.breakpoints[0]})`
+      );
+      this.mediumWatcher = window.matchMedia(
+        `(min-width: ${theme.breakpoints[1]})`
+      );
+      this.largeWatcher = window.matchMedia(
+        `(min-width: ${theme.breakpoints[2]})`
+      );
       // TODO: addListener is deprecated, but safari 13 requires it
       this.themeWatcher.addListener(this.updateTheme);
       this.mobileWatcher.addListener(this.updateMobile);
@@ -152,25 +167,56 @@ class App extends React.Component {
     this.props.set((state) => {
       state.breaks.sm = e.matches;
     });
-  }
+  };
 
   updateMedium = (e) => {
     this.props.set((state) => {
       state.breaks.md = e.matches;
     });
-  }
+  };
 
   updateLarge = (e) => {
     this.props.set((state) => {
       state.breaks.lg = e.matches;
     });
-  }
+  };
 
   getTheme() {
     const { props } = this;
-    return ((props.dark && props?.display?.theme == 'auto') ||
+    const { display } = props;
+    if (display.theme === 'custom') {
+      const valid = /^#[0-9A-F]{6}$/i;
+      const clonedLight = cloneDeep(light);
+      clonedLight.fonts.sans = display.sans;
+      clonedLight.colors.black = valid.test(display.black)
+        ? display.black
+        : '#000000';
+      clonedLight.colors.washedGray = `rgba(${chroma(
+        valid.test(display.black) ? display.black : '#000000'
+      )
+        .alpha(0.25)
+        .rgba()
+        .toString()})`;
+      clonedLight.colors.lightGray = `rgba(${chroma(
+        valid.test(display.black) ? display.black : '#000000'
+      )
+        .alpha(0.5)
+        .rgba()
+        .toString()})`;
+      clonedLight.colors.gray = `rgba(${chroma(
+        valid.test(display.black) ? display.black : '#000000'
+      )
+        .alpha(0.75)
+        .rgba()
+        .toString()})`;
+      clonedLight.colors.white = display.white;
+      clonedLight.borders = ['none', display.border];
+      return clonedLight;
+    }
+    return (props.dark && props?.display?.theme == 'auto') ||
       props?.display?.theme == 'dark'
-    ) ? dark : light;
+      ? dark
+      : light;
   }
 
   render() {
@@ -182,21 +228,27 @@ class App extends React.Component {
       <ThemeProvider theme={theme}>
         <ShortcutContextProvider>
           <Helmet>
-            {window.ship.length < 14
-              ? <link rel="icon" type="image/svg+xml" href={svgDataURL(favicon())} />
-              : null}
+            {window.ship.length < 14 ? (
+              <link
+                rel="icon"
+                type="image/svg+xml"
+                href={svgDataURL(favicon())}
+              />
+            ) : null}
           </Helmet>
           <Root>
             <Router basename="/apps/escape">
-              {!IS_MOBILE && <ErrorBoundary>
-                <StatusBarWithRouter
-                  props={this.props}
-                  ourContact={ourContact}
-                  connection={'foo'}
-                  subscription={this.subscription}
-                  ship={this.ship}
-                />
-              </ErrorBoundary>}
+              {!IS_MOBILE && (
+                <ErrorBoundary>
+                  <StatusBarWithRouter
+                    props={this.props}
+                    ourContact={ourContact}
+                    connection={'foo'}
+                    subscription={this.subscription}
+                    ship={this.ship}
+                  />
+                </ErrorBoundary>
+              )}
               <ErrorBoundary>
                 <Omnibox
                   show={this.props.omniboxShown}
@@ -210,9 +262,11 @@ class App extends React.Component {
                   connection={'aa'}
                 />
               </ErrorBoundary>
-              {IS_MOBILE && <ErrorBoundary>
-                <MobileNavbar props={this.props} />
-              </ErrorBoundary>}
+              {IS_MOBILE && (
+                <ErrorBoundary>
+                  <MobileNavbar props={this.props} />
+                </ErrorBoundary>
+              )}
             </Router>
           </Root>
           <div id="portal-root" />
@@ -230,7 +284,7 @@ const selGraph = s => s.getShallowChildren;
 
 const WithApp = React.forwardRef((props, ref) => {
   const ourContact = useContactState(selContacts);
-  const [display, getAll] = useSettingsState(selSettings, shallow);
+  const [display, getAll] = useSettingsState(selSettings);
   const [setLocal, omniboxShown, toggleOmnibox, dark] = useLocalState(selLocal);
   const getShallowChildren = useGraphState(selGraph);
 
