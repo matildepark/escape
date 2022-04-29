@@ -22,7 +22,7 @@ export class OmniboxInput extends Component<OmniboxInputProps> {
         }}
         width='100%'
         p={2}
-        backgroundColor='white'
+        backgroundColor='transparent'
         color='black'
         border='1px solid transparent'
         borderRadius={2}
