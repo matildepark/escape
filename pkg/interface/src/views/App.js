@@ -19,6 +19,7 @@ import useGraphState from '~/logic/state/graph';
 import { ShortcutContextProvider } from '~/logic/lib/shortcutContext';
 import { IS_MOBILE } from '~/logic/lib/platform';
 import chroma from 'chroma-js';
+import { cloneDeep } from 'lodash';
 
 import ErrorBoundary from '~/views/components/ErrorBoundary';
 import { MobileNavbar } from '~/views/components/navigation/MobileNavbar';
@@ -184,7 +185,7 @@ class App extends React.Component {
     const { props } = this;
     const { display } = props;
     if (display.theme === 'custom') {
-      const clonedLight = Object.assign({}, light);
+      const clonedLight = cloneDeep(light);
       clonedLight.fonts.sans = display.sans;
       clonedLight.colors.black = display.black;
       clonedLight.colors.washedGray = `rgba(${chroma(display.black || '#000000')
@@ -201,7 +202,6 @@ class App extends React.Component {
         .toString()})`;
       clonedLight.colors.white = display.white;
       clonedLight.borders = ['none', display.border];
-      console.log(clonedLight);
       return clonedLight;
     }
     return (props.dark && props?.display?.theme == 'auto') ||
@@ -267,7 +267,7 @@ class App extends React.Component {
   }
 }
 const WarmApp =
-  process.env.NODE_ENV === 'production' ? new App() : new hot(App);
+  process.env.NODE_ENV === 'production' ? new App() : hot(App);
 
 const selContacts = s => s.contacts[`~${window.ship}`];
 const selLocal = s => [s.set, s.omniboxShown, s.toggleOmnibox, s.dark];
