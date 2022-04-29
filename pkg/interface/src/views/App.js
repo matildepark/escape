@@ -275,7 +275,7 @@ class App extends React.Component {
     );
   }
 }
-const WarmApp = process.env.NODE_ENV === 'production' ? new App() : hot(App);
+const WarmApp = process.env.NODE_ENV === 'production' ? App : hot(App);
 
 const selContacts = s => s.contacts[`~${window.ship}`];
 const selLocal = s => [s.set, s.omniboxShown, s.toggleOmnibox, s.dark];
