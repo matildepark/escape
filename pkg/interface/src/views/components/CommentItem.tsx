@@ -123,7 +123,7 @@ return false;
                   backgroundColor="white"
                   gapY="2"
                 >
-                  <Action bg="white" onClick={doCopy}>
+                  <Action bg="transparent" onClick={doCopy}>
                     {copyDisplay}
                   </Action>
                   {(window.ship == post?.author && !disabled) ? (

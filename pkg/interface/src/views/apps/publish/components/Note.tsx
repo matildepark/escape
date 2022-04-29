@@ -111,7 +111,7 @@ export function Note(props: NoteProps & RouteComponentProps) {
             maxNameWidth="225px"
           />
           <Row px={2} gapX={2} alignItems="flex-end" height="14px">
-            <Action bg="white" onClick={doCopy}>{copyDisplay}</Action>
+            <Action bg="transparent" onClick={doCopy}>{copyDisplay}</Action>
             {adminLinks}
           </Row>
         </Row>

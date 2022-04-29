@@ -79,7 +79,7 @@ const PostHeader = (props: PostHeaderProps): ReactElement => {
             borderColor="lightGray"
             p={1}
           >
-            <Action bg="white" m={1} color="black" onClick={doCopy}>
+            <Action bg="transparent" m={1} color="black" onClick={doCopy}>
               {copyDisplay}
             </Action>
             <Action bg="white" m={1} color="black" onClick={doDelete}>

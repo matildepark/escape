@@ -36,7 +36,7 @@ export function UqbarHome(props) {
       flexDirection="column"
       mt={3}
     >
-      <H2 mb={3} ml={3}>EScape from Eternal September <Text fontSize="16px">(v{version})</Text></H2>
+      <H2 mb={3} ml={3}>EScape from mom <Text fontSize="16px">(v{version})</Text></H2>
       <Link to='/~info'>
         <H3 ml={3} borderBottom="1px solid gray">App Info</H3>
       </Link>
