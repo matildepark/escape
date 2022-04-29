@@ -185,18 +185,19 @@ class App extends React.Component {
     const { props } = this;
     const { display } = props;
     if (display.theme === 'custom') {
+      const valid = /^#[0-9A-F]{6}$/i;
       const clonedLight = cloneDeep(light);
       clonedLight.fonts.sans = display.sans;
       clonedLight.colors.black = display.black;
-      clonedLight.colors.washedGray = `rgba(${chroma(display.black || '#000000')
+      clonedLight.colors.washedGray = `rgba(${chroma(valid.test(display.black) ? display.black : '#000000')
         .alpha(0.25)
         .rgba()
         .toString()})`;
-      clonedLight.colors.lightGray = `rgba(${chroma(display.black || '#000000')
+      clonedLight.colors.lightGray = `rgba(${chroma(valid.test(display.black) ? display.black : '#000000')
         .alpha(0.5)
         .rgba()
         .toString()})`;
-      clonedLight.colors.gray = `rgba(${chroma(display.black || '#000000')
+      clonedLight.colors.gray = `rgba(${chroma(valid.test(display.black) ? display.black : '#000000')
         .alpha(0.75)
         .rgba()
         .toString()})`;
