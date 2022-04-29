@@ -32,7 +32,11 @@ export interface SettingsState {
     backgroundType: 'none' | 'url' | 'color';
     background?: string;
     dark: boolean;
-    theme: 'light' | 'dark' | 'auto';
+    theme: 'light' | 'dark' | 'auto' | 'custom';
+    sans: string;
+    border: string;
+    white: string;
+    black: string;
   };
   calm: {
     hideNicknames: boolean;
@@ -69,7 +73,11 @@ const useSettingsState = createState<SettingsState>(
       backgroundType: 'none',
       background: undefined,
       dark: false,
-      theme: 'auto'
+      theme: 'auto',
+      sans: 'Inter',
+      white: 'FFFFFF',
+      black: '000000',
+      border: '1px solid'
     },
     calm: {
       hideNicknames: false,
